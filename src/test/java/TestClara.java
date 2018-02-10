@@ -29,9 +29,6 @@ public class TestClara {
             String smile = opsinParser.parseToSmiles("water");
             System.out.println(smile);
             IAtomContainer tnt = smilesParser.parseSmiles(smile);
-            for (IAtom atom : tnt.getConnectedAtomsList(tnt.getAtom(1))) {
-                System.out.println(atom.getImplicitHydrogenCount());
-            }
         } catch (InvalidSmilesException e) {
             System.err.println(e.getMessage());
         }

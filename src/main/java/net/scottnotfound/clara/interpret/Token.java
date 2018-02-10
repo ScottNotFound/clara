@@ -3,7 +3,7 @@ package net.scottnotfound.clara.interpret;
 public class Token {
 
     private final TokenType type;
-    private String lexeme;
+    protected String lexeme;
     private Object literal;
     private int line;
 
