@@ -11,7 +11,9 @@ public class TestClara {
     public static void main(String[] args) {
 
 
-        testSMILES();
+
+
+
     }
 
     public static void testSMILES() {
