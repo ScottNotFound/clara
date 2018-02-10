@@ -1,4 +1,7 @@
+import net.scottnotfound.clara.interpret.Expression;
 import net.scottnotfound.clara.interpret.Lexer;
+import net.scottnotfound.clara.interpret.Parser;
+import net.scottnotfound.clara.interpret.PrintAST;
 import org.openscience.cdk.CDKConstants;
 import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.interfaces.IAtom;
@@ -12,9 +15,12 @@ public class TestClara {
     public static void main(String[] args) {
 
 
-        Lexer lexer = new Lexer("\u3435");
+        Lexer lexer = new Lexer("4 + 4");
         lexer.lex();
-        testSMILES();
+        Parser parser = new Parser(lexer.lex());
+        Expression expression = parser.parse();
+        System.out.println(new PrintAST().print(expression));
+
     }
 
     public static void testSMILES() {

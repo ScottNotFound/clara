@@ -2,10 +2,10 @@ package net.scottnotfound.clara.interpret;
 
 public class Token {
 
-    private final TokenType type;
+    protected final TokenType type;
     protected String lexeme;
-    private Object literal;
-    private int line;
+    protected Object literal;
+    protected int line;
 
     public Token(TokenType type, String lexeme, Object literal, int line) {
         this.type = type;

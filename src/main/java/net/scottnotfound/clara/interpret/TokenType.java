@@ -19,6 +19,7 @@ public enum TokenType {
 
     NOT_EQUALS, LESS_EQUALS,
     GREATER_EQUALS, EQUALS,
+    DOUBLE_EQUALS,
 
     STRING, NUMBER, IDENTIFIER,
 
