@@ -1,3 +1,4 @@
+import net.scottnotfound.clara.interpret.Lexer;
 import org.openscience.cdk.CDKConstants;
 import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.interfaces.IAtom;
@@ -11,9 +12,9 @@ public class TestClara {
     public static void main(String[] args) {
 
 
-
-
-
+        Lexer lexer = new Lexer("\u3435");
+        lexer.lex();
+        testSMILES();
     }
 
     public static void testSMILES() {
@@ -25,7 +26,7 @@ public class TestClara {
             IAtomContainer m = smilesParser.parseSmiles("c1ccccc1");
             Integer c1 = m.getAtom(1).getProperty(CDKConstants.ATOM_ATOM_MAPPING);
             NameToStructure opsinParser = NameToStructure.getInstance();
-            String smile = opsinParser.parseToSmiles("trinitrotoluene");
+            String smile = opsinParser.parseToSmiles("water");
             System.out.println(smile);
             IAtomContainer tnt = smilesParser.parseSmiles(smile);
             for (IAtom atom : tnt.getConnectedAtomsList(tnt.getAtom(1))) {
