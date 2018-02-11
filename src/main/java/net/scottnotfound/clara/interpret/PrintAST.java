@@ -1,18 +1,18 @@
 package net.scottnotfound.clara.interpret;
 
-public class PrintAST implements Visitor<String> {
+public class PrintAST implements IExprVisitor<String> {
 
-    public String print(Expression expression) {
-        return expression.accept(this);
+    public String print(Expr expr) {
+        return expr.accept(this);
     }
 
-    private String parenthesize(String name, Expression... expressions) {
+    private String parenthesize(String name, Expr... exprs) {
         StringBuilder builder = new StringBuilder();
 
         builder.append("(").append(name);
-        for (Expression expression : expressions) {
+        for (Expr expr : exprs) {
             builder.append(" ");
-            builder.append(expression.accept(this));
+            builder.append(expr.accept(this));
         }
         builder.append(")");
 
@@ -21,7 +21,7 @@ public class PrintAST implements Visitor<String> {
 
 
     @Override
-    public String visitLiteralExpr(Expression.Literal expression) {
+    public String visitExpr(Expr.Literal expression) {
         if (expression.value == null) {
             return "null";
         } else {
@@ -30,22 +30,38 @@ public class PrintAST implements Visitor<String> {
     }
 
     @Override
-    public String visitGroupingExpr(Expression.Grouping expression) {
+    public String visitExpr(Expr.Grouping expression) {
         return parenthesize("group", expression.expression);
     }
 
     @Override
-    public String visitUnaryExpr(Expression.Unary expression) {
+    public String visitExpr(Expr.Unary expression) {
         return parenthesize(expression.operator.lexeme, expression.expression);
     }
 
     @Override
-    public String visitBinaryExpr(Expression.Binary expression) {
-        return parenthesize(expression.operator.lexeme, expression.expression_left, expression.expression_right);
+    public String visitExpr(Expr.Binary expression) {
+        return parenthesize(expression.operator.lexeme, expression.expr_left, expression.expr_right);
     }
 
     @Override
-    public String visitOperatorExpr(Expression.Operator expression) {
+    public String visitExpr(Expr.Variable expression) {
         return null;
     }
+
+    @Override
+    public String visitExpr(Expr.Assign expression) {
+        return null;
+    }
+
+    @Override
+    public String visitExpr(Expr.Logical expression) {
+        return null;
+    }
+
+    @Override
+    public String visitExpr(Expr.Call expression) {
+        return null;
+    }
+
 }

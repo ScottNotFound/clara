@@ -17,6 +17,19 @@ public class Lexer {
 
     static {
         keywords = new HashMap<>();
+        keywords.put("print", TokenType.PRINT);
+        keywords.put("var", TokenType.VAR);
+        keywords.put("let", TokenType.VAR);
+        keywords.put("if", TokenType.IF);
+        keywords.put("while", TokenType.WHILE);
+        keywords.put("const", TokenType.CONST);
+        keywords.put("fun", TokenType.FUN);
+        keywords.put("func", TokenType.FUN);
+        keywords.put("def", TokenType.FUN);
+        keywords.put("else", TokenType.ELSE);
+        keywords.put("return", TokenType.RETURN);
+        keywords.put("for", TokenType.FOR);
+
     }
 
 
@@ -105,7 +118,7 @@ public class Lexer {
                 } else if (isAlpha(c)) {
                     collectIdentifier();
                 } else {
-                    System.err.println("error at line " + line);
+                    Lang.error(line, "Unexpected character.");
                 }
                 break;
             }
