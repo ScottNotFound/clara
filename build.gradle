@@ -1,5 +1,6 @@
 group 'net.scottnotfound'
-version '0.0.001-SNAPSHOT'
+archivesBaseName 'clara'
+version '0.0.002-SNAPSHOT'
 
 apply plugin: 'java'
 apply plugin: 'idea'
