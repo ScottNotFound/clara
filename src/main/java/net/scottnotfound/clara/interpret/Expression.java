@@ -1,9 +1,17 @@
 package net.scottnotfound.clara.interpret;
 
+/**
+ * This class provides a representation for various expressions that may be found.
+ * accept() should be called when you wish to do something with an expression. What is
+ * done with the expression is determined by the implementations of Visitor interface.
+ */
 public abstract class Expression {
 
     protected abstract <R> R accept(Visitor<R> visitor);
 
+    /**
+     * Used when the expression is a literal value such as a number or string.
+     */
     public static class Literal extends Expression {
         protected final Object value;
 
@@ -16,7 +24,9 @@ public abstract class Expression {
         }
     }
 
-
+    /**
+     * Used when the expression is a grouping of other expressions, typically grouped with ().
+     */
     public static class Grouping extends Expression {
         protected final Expression expression;
 
@@ -29,7 +39,9 @@ public abstract class Expression {
         }
     }
 
-
+    /**
+     * Used when the expression is a unary operation such as '-' for negating a number or '!' for negating a boolean.
+     */
     public static class Unary extends Expression {
         protected final Expression expression;
         protected final Token operator;
@@ -44,7 +56,9 @@ public abstract class Expression {
         }
     }
 
-
+    /**
+     * Used when the expression is a binary operation such as '4 + 5' or '6 > 3'
+     */
     public static class Binary extends Expression {
         protected final Expression expression_left;
         protected final Expression expression_right;
@@ -61,7 +75,9 @@ public abstract class Expression {
         }
     }
 
-
+    /**
+     * Has no current use. A singleton operator isn't really an expression anyway.
+     */
     public static class Operator extends Expression {
         private final Expression operator;
 

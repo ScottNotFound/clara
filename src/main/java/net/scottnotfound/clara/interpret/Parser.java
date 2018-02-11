@@ -4,11 +4,11 @@ import java.util.List;
 
 public class Parser {
 
-    private final List<Token> tokens;
+    private final List<Token> tokenSequence;
     private int current = 0;
 
-    public Parser(List<Token> tokens) {
-        this.tokens = tokens;
+    public Parser(List<Token> tokenSequence) {
+        this.tokenSequence = tokenSequence;
     }
 
     public Expression parse() {
@@ -22,8 +22,8 @@ public class Parser {
     private Expression equality() {
         Expression expression = comparison();
 
-        while (match(TokenType.NOT_EQUALS, TokenType.DOUBLE_EQUALS)) {
-            Token operator = previous();
+        while (matchToken(TokenType.NOT_EQUALS, TokenType.DOUBLE_EQUALS)) {
+            Token operator = previousToken();
             Expression right = comparison();
             expression = new Expression.Binary(expression, operator, right);
         }
@@ -31,10 +31,10 @@ public class Parser {
         return expression;
     }
 
-    private boolean match(TokenType... tokenTypes) {
+    private boolean matchToken(TokenType... tokenTypes) {
         for (TokenType tokenType : tokenTypes) {
-            if (check(tokenType)) {
-                advance();
+            if (checkCurrentToken(tokenType)) {
+                advanceToken();
                 return true;
             }
         }
@@ -42,38 +42,34 @@ public class Parser {
         return false;
     }
 
-    private boolean check(TokenType tokenType) {
-        if (isAtEnd()) {
-            return false;
-        } else {
-            return peek().type == tokenType;
-        }
+    private boolean checkCurrentToken(TokenType tokenType) {
+        return isGood() && peekCurrent().type == tokenType;
     }
 
-    private Token advance() {
-        if (!isAtEnd()) {
+    private Token advanceToken() {
+        if (isGood()) {
             current++;
         }
-        return previous();
+        return previousToken();
     }
 
-    private boolean isAtEnd() {
-        return peek().type == TokenType.EOF;
+    private boolean isGood() {
+        return peekCurrent().type != TokenType.EOF;
     }
 
-    private Token peek() {
-        return tokens.get(current);
+    private Token peekCurrent() {
+        return tokenSequence.get(current);
     }
 
-    private Token previous() {
-        return tokens.get(current - 1);
+    private Token previousToken() {
+        return tokenSequence.get(current - 1);
     }
 
     private Expression comparison() {
         Expression expression = addition();
 
-        while (match(TokenType.BRACKNQ_RIGHT, TokenType.GREATER_EQUALS, TokenType.LESS_EQUALS, TokenType.BRACKNQ_LEFT)) {
-            Token operator = previous();
+        while (matchToken(TokenType.BRACKNQ_RIGHT, TokenType.GREATER_EQUALS, TokenType.LESS_EQUALS, TokenType.BRACKNQ_LEFT)) {
+            Token operator = previousToken();
             Expression right = addition();
             expression = new Expression.Binary(expression, operator, right);
         }
@@ -84,8 +80,8 @@ public class Parser {
     private Expression addition() {
         Expression expression = multiplication();
 
-        while (match(TokenType.MINUS, TokenType.PLUS)) {
-            Token operator = previous();
+        while (matchToken(TokenType.MINUS, TokenType.PLUS)) {
+            Token operator = previousToken();
             Expression right = multiplication();
             expression = new Expression.Binary(expression, operator, right);
         }
@@ -96,8 +92,8 @@ public class Parser {
     private Expression multiplication() {
         Expression expression = unary();
 
-        while (match(TokenType.SLASH_FRWD, TokenType.ASTERISK)) {
-            Token operator = previous();
+        while (matchToken(TokenType.SLASH_FRWD, TokenType.ASTERISK)) {
+            Token operator = previousToken();
             Expression right = unary();
             expression = new Expression.Binary(expression, operator, right);
         }
@@ -106,8 +102,8 @@ public class Parser {
     }
 
     private Expression unary() {
-        if (match(TokenType.EXCLAMK, TokenType.MINUS)) {
-            Token operator = previous();
+        if (matchToken(TokenType.EXCLAMK, TokenType.MINUS)) {
+            Token operator = previousToken();
             Expression expression = unary();
             return new Expression.Unary(expression, operator);
         }
@@ -116,11 +112,11 @@ public class Parser {
     }
 
     private Expression primary() {
-        if (match(TokenType.NUMBER, TokenType.STRING)) {
-            return new Expression.Literal(previous().literal);
+        if (matchToken(TokenType.NUMBER, TokenType.STRING)) {
+            return new Expression.Literal(previousToken().literal);
         }
 
-        if (match(TokenType.PAREN_LEFT)) {
+        if (matchToken(TokenType.PAREN_LEFT)) {
             Expression expression = expression();
             consume(TokenType.PAREN_RIGHT, "Expect ')' after expression.");
             return new Expression.Grouping(expression);
@@ -130,11 +126,11 @@ public class Parser {
     }
 
     private Token consume(TokenType type, String message) {
-        if (check(type)) {
-            return advance();
+        if (checkCurrentToken(type)) {
+            return advanceToken();
         }
 
-        error(peek(), message);
+        error(peekCurrent(), message);
         System.exit(1);
         return null;
     }

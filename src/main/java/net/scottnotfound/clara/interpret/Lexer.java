@@ -7,8 +7,8 @@ import java.util.Map;
 
 public class Lexer {
 
-    private final String source;
-    private final List<Token> tokens = new ArrayList<>();
+    private final String sourceSequence;
+    private final List<Token> tokenSequence = new ArrayList<>();
     private int start = 0;
     private int current = 0;
     private int line = 1;
@@ -20,8 +20,8 @@ public class Lexer {
     }
 
 
-    public Lexer(String source) {
-        this.source = source;
+    public Lexer(String sourceSequence) {
+        this.sourceSequence = sourceSequence;
     }
 
     public List<Token> lex() {
@@ -30,22 +30,22 @@ public class Lexer {
             scanToken();
         }
 
-        tokens.add(new Token(TokenType.EOF, "", null, line));
-        return tokens;
+        tokenSequence.add(new Token(TokenType.EOF, "", null, line));
+        return tokenSequence;
     }
 
     private boolean isAtEnd() {
-        return current >= source.length();
+        return current >= sourceSequence.length();
     }
 
     private void scanToken() {
-        char c = advance();
+        char c = advanceChar();
         switch (c) {
             case ' ':               break;
             case '\r':              break;
             case '\t':              break;
             case '\n':  line++;     break;
-            case '"':   string();   break;
+            case '"':   collectString();   break;
             case '(':   addToken(TokenType.PAREN_LEFT);     break;
             case ')':   addToken(TokenType.PAREN_RIGHT);    break;
             case '{':   addToken(TokenType.BRACE_LEFT);     break;
@@ -72,25 +72,38 @@ public class Lexer {
             case '_':   addToken(TokenType.UNDERSCORE);     break;
             case '=':   addToken(TokenType.EQUALS);         break;
             case '\'':  addToken(TokenType.QUOTEMK_S);      break;
-            case '\\':  addToken(TokenType.SLASH_BACK);     break;
-            case '!':   addToken(match('=') ? TokenType.NOT_EQUALS : TokenType.EXCLAMK);            break;
-            case '<':   addToken(match('=') ? TokenType.LESS_EQUALS : TokenType.BRACKNQ_LEFT);      break;
-            case '>':   addToken(match('=') ? TokenType.GREATER_EQUALS : TokenType.BRACKNQ_RIGHT);  break;
+            case '!':   addToken(matchChar('=') ? TokenType.NOT_EQUALS : TokenType.EXCLAMK);            break;
+            case '<':   addToken(matchChar('=') ? TokenType.LESS_EQUALS : TokenType.BRACKNQ_LEFT);      break;
+            case '>':   addToken(matchChar('=') ? TokenType.GREATER_EQUALS : TokenType.BRACKNQ_RIGHT);  break;
             case '/': {
-                if (match('/')) {
-                    while (peek() != '\n' && !isAtEnd()) {
-                        advance();
+                /*
+                 * Need to check for two consecutive '/' to use for a line comment
+                 */
+                if (matchChar('/')) {
+                    while (peekCurrent() != '\n' && !isAtEnd()) {
+                        advanceChar();
                     }
                 } else {
                     addToken(TokenType.SLASH_FRWD);
                 }
                 break;
             }
+            case '\\': {
+                /*
+                 * Need to check for certain characters after a '\' (escape character)
+                 */
+                switch (peekNext()) {
+                    default: {
+                        addToken(TokenType.SLASH_BACK);
+                        break;
+                    }
+                }
+            }
             default: {
                 if (isDigit(c)) {
-                    number();
+                    collectNumber();
                 } else if (isAlpha(c)) {
-                    identifier();
+                    collectIdentifier();
                 } else {
                     System.err.println("error at line " + line);
                 }
@@ -99,24 +112,24 @@ public class Lexer {
         }
     }
 
-    private char advance() {
-        return source.charAt(current++);
+    private char advanceChar() {
+        return sourceSequence.charAt(current++);
     }
 
     private void addToken(TokenType type) {
         addToken(type, null);
     }
 
-    private void addToken(TokenType type, Object literal) {
-        String lexeme = source.substring(start, current);
-        tokens.add(new Token(type, lexeme, literal, line));
+    private void addToken(TokenType type, Object value) {
+        String lexeme = sourceSequence.substring(start, current);
+        tokenSequence.add(new Token(type, lexeme, value, line));
     }
 
-    private boolean match(char expected) {
+    private boolean matchChar(char expected) {
         if (isAtEnd()) {
             return false;
         }
-        if (source.charAt(current) != expected) {
+        if (sourceSequence.charAt(current) != expected) {
             return false;
         }
 
@@ -124,27 +137,27 @@ public class Lexer {
         return true;
     }
 
-    private char peek() {
+    private char peekCurrent() {
         if (isAtEnd()) {
             return '\0';
         }
-        return source.charAt(current);
+        return sourceSequence.charAt(current);
     }
 
     private char peekNext() {
-        if (current + 1 >= source.length()) {
+        if (current + 1 >= sourceSequence.length()) {
             return '\0';
         } else {
-            return source.charAt(current + 1);
+            return sourceSequence.charAt(current + 1);
         }
     }
 
-    private void string() {
-        while (peek() != '"' && !isAtEnd()) {
-            if (peek() == '\n') {
+    private void collectString() {
+        while (peekCurrent() != '"' && !isAtEnd()) {
+            if (peekCurrent() == '\n') {
                 line++;
             }
-            advance();
+            advanceChar();
         }
 
         if (isAtEnd()) {
@@ -152,36 +165,36 @@ public class Lexer {
             return;
         }
 
-        advance();
+        advanceChar();
 
-        String value = source.substring(start + 1, current - 1);
+        String value = sourceSequence.substring(start + 1, current - 1);
         addToken(TokenType.STRING, value);
     }
 
-    private void number() {
-        while (isDigit(peek())) {
-            advance();
+    private void collectNumber() {
+        while (isDigit(peekCurrent())) {
+            advanceChar();
         }
 
-        if (peek() == '.' && isDigit(peekNext())) {
-            advance();
+        if (peekCurrent() == '.' && isDigit(peekNext())) {
+            advanceChar();
 
-            while (isDigit(peek())) advance();
+            while (isDigit(peekCurrent())) advanceChar();
         }
 
-        addToken(TokenType.NUMBER, Double.parseDouble(source.substring(start, current)));
+        addToken(TokenType.NUMBER, Double.parseDouble(sourceSequence.substring(start, current)));
     }
 
     private boolean isDigit(char c) {
         return c >= '0' && c <= '9';
     }
 
-    private void identifier() {
-        while (isAlphaNumeric(peek())) {
-            advance();
+    private void collectIdentifier() {
+        while (isAlphaNumeric(peekCurrent())) {
+            advanceChar();
         }
 
-        String text = source.substring(start, current);
+        String text = sourceSequence.substring(start, current);
 
         TokenType type = keywords.get(text.toLowerCase());
         if (type == null) {
