@@ -1,13 +1,13 @@
-package net.scottnotfound.clara.interpret;
+package net.scottnotfound.clara.lang;
 
 import java.util.List;
 
 public class Function implements Callable {
 
-    private final Stmt.Function declaration;
+    private final net.scottnotfound.clara.lang.Stmt.Function declaration;
     private final Environment closure;
 
-    Function(Stmt.Function declaration, Environment closure) {
+    Function(net.scottnotfound.clara.lang.Stmt.Function declaration, Environment closure) {
         this.closure = closure;
         this.declaration = declaration;
     }
@@ -36,4 +36,5 @@ public class Function implements Callable {
     public String toString() {
         return "<fn " + declaration.token.lexeme + ">";
     }
+
 }

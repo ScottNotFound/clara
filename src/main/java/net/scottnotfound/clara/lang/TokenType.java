@@ -1,4 +1,4 @@
-package net.scottnotfound.clara.interpret;
+package net.scottnotfound.clara.lang;
 
 public enum TokenType {
 

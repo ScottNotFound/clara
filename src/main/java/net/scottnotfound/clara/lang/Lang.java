@@ -1,4 +1,4 @@
-package net.scottnotfound.clara.interpret;
+package net.scottnotfound.clara.lang;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,8 +11,8 @@ import java.util.List;
 public class Lang {
 
     private static final Interpreter interpreter = new Interpreter();
-    static boolean hadError = false;
-    static boolean hadRuntimeError = false;
+    private static boolean hadError = false;
+    private static boolean hadRuntimeError = false;
 
     public static void main(String[] args) throws IOException {
         if (args.length > 1) {

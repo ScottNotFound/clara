@@ -1,4 +1,4 @@
-package net.scottnotfound.clara.interpret;
+package net.scottnotfound.clara.lang;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,7 +46,11 @@ class Environment {
         return ancestor(distance).values.get(lexeme);
     }
 
-    Environment ancestor(Integer distance) {
+    void assignAt(Integer distance, Token token, Object value) {
+        ancestor(distance).values.put(token.lexeme, value);
+    }
+
+    private Environment ancestor(Integer distance) {
         Environment environment = this;
         for (int i = 0; i < distance; i++) {
             environment = environment.enclosing;
@@ -54,7 +58,4 @@ class Environment {
         return environment;
     }
 
-    void assignAt(Integer distance, Token token, Object value) {
-        ancestor(distance).values.put(token.lexeme, value);
-    }
 }

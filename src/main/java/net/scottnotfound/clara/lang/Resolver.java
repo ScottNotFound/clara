@@ -1,4 +1,4 @@
-package net.scottnotfound.clara.interpret;
+package net.scottnotfound.clara.lang;
 
 import java.util.HashMap;
 import java.util.List;

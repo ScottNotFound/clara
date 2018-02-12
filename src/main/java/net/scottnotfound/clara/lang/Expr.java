@@ -1,17 +1,24 @@
-package net.scottnotfound.clara.interpret;
+package net.scottnotfound.clara.lang;
 
 import java.util.List;
 
 /**
  * This class provides a representation for various expressions that may be found.
  * accept() should be called when you wish to do something with an expression. What is
- * done with the expression is determined by the implementations of Visitor interface.
+ * done with the expression is determined by the implementations of IExprVisitor interface.
+ * The different expression types are constructed by the parser based on the tokens.
  */
 abstract class Expr {
 
+    /**
+     * Call to delegate action to the specific visit method.
+     */
     abstract <R> R accept(IExprVisitor<R> visitor);
 
 
+    /**
+     * Used when the expression is being assigned to a variable.
+     */
     static class Assign extends Expr {
         Assign(Token token, Expr expression) {
             this.token = token;
@@ -45,6 +52,9 @@ abstract class Expr {
         final Token operator;
     }
 
+    /**
+     * Used when the expression is a function call.
+     */
     static class Call extends Expr {
         Call(Expr callee, Token paren, List<Expr> arguments) {
             this.callee = callee;
@@ -91,6 +101,9 @@ abstract class Expr {
         final Object value;
     }
 
+    /**
+     * Used when the expression is a logical operation such as 'or' or 'and'.
+     */
     static class Logical extends Expr {
         Logical(Expr left, Token operator, Expr right) {
             this.left = left;
@@ -124,6 +137,9 @@ abstract class Expr {
         final Token operator;
     }
 
+    /**
+     * Used when the expression is a variable.
+     */
     static class Variable extends Expr {
         Variable(Token token) {
             this.token = token;

@@ -1,6 +1,6 @@
 package net.scottnotfound.clara;
 
-import net.scottnotfound.clara.interpret.Lang;
+import net.scottnotfound.clara.lang.Lang;
 
 import java.io.IOException;
 

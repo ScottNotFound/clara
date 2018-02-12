@@ -1,4 +1,4 @@
-package net.scottnotfound.clara.interpret;
+package net.scottnotfound.clara.lang;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,18 +40,14 @@ public class Lexer {
     public List<Token> lex() {
         while (!isAtEnd()) {
             start = current;
-            scanToken();
+            lexToken();
         }
 
         tokenSequence.add(new Token(TokenType.EOF, "", null, line));
         return tokenSequence;
     }
 
-    private boolean isAtEnd() {
-        return current >= sourceSequence.length();
-    }
-
-    private void scanToken() {
+    private void lexToken() {
         char c = advanceChar();
         switch (c) {
             case ' ':               break;
@@ -125,46 +121,6 @@ public class Lexer {
         }
     }
 
-    private char advanceChar() {
-        return sourceSequence.charAt(current++);
-    }
-
-    private void addToken(TokenType type) {
-        addToken(type, null);
-    }
-
-    private void addToken(TokenType type, Object value) {
-        String lexeme = sourceSequence.substring(start, current);
-        tokenSequence.add(new Token(type, lexeme, value, line));
-    }
-
-    private boolean matchChar(char expected) {
-        if (isAtEnd()) {
-            return false;
-        }
-        if (sourceSequence.charAt(current) != expected) {
-            return false;
-        }
-
-        current++;
-        return true;
-    }
-
-    private char peekCurrent() {
-        if (isAtEnd()) {
-            return '\0';
-        }
-        return sourceSequence.charAt(current);
-    }
-
-    private char peekNext() {
-        if (current + 1 >= sourceSequence.length()) {
-            return '\0';
-        } else {
-            return sourceSequence.charAt(current + 1);
-        }
-    }
-
     private void collectString() {
         while (peekCurrent() != '"' && !isAtEnd()) {
             if (peekCurrent() == '\n') {
@@ -198,10 +154,6 @@ public class Lexer {
         addToken(TokenType.NUMBER, Double.parseDouble(sourceSequence.substring(start, current)));
     }
 
-    private boolean isDigit(char c) {
-        return c >= '0' && c <= '9';
-    }
-
     private void collectIdentifier() {
         while (isAlphaNumeric(peekCurrent())) {
             advanceChar();
@@ -217,6 +169,50 @@ public class Lexer {
         addToken(type);
     }
 
+    private boolean matchChar(char expected) {
+        if (isAtEnd()) {
+            return false;
+        }
+        if (sourceSequence.charAt(current) != expected) {
+            return false;
+        }
+
+        current++;
+        return true;
+    }
+
+    private void addToken(TokenType type) {
+        addToken(type, null);
+    }
+
+    private void addToken(TokenType type, Object value) {
+        String lexeme = sourceSequence.substring(start, current);
+        tokenSequence.add(new Token(type, lexeme, value, line));
+    }
+
+    private char advanceChar() {
+        return sourceSequence.charAt(current++);
+    }
+
+    private char peekCurrent() {
+        if (isAtEnd()) {
+            return '\0';
+        }
+        return sourceSequence.charAt(current);
+    }
+
+    private char peekNext() {
+        if (current + 1 >= sourceSequence.length()) {
+            return '\0';
+        } else {
+            return sourceSequence.charAt(current + 1);
+        }
+    }
+
+    private boolean isDigit(char c) {
+        return c >= '0' && c <= '9';
+    }
+
     private boolean isAlpha(char c) {
         return ((c >= 'a' && c <= 'z') ||
                 (c >= 'A' && c <= 'Z') ||
@@ -226,4 +222,9 @@ public class Lexer {
     private boolean isAlphaNumeric(char c) {
         return isAlpha(c) || isDigit(c);
     }
+
+    private boolean isAtEnd() {
+        return current >= sourceSequence.length();
+    }
+
 }

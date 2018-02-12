@@ -1,11 +1,23 @@
-package net.scottnotfound.clara.interpret;
+package net.scottnotfound.clara.lang;
 
 import java.util.List;
 
-public abstract class Stmt {
+/**
+ * This class provides a representation for various statements that may be found.
+ * accept() should be called when you wish to do something with a statement. What is
+ * done with the statement is determined by the implementations of IStmtVisitor interface.
+ * The different statement types are constructed by the parser based on the tokens.
+ */
+abstract class Stmt {
 
+    /**
+     * Call to delegate action to the specific visit method.
+     */
     abstract <R> R accept(IStmtVisitor<R> visitor);
 
+    /**
+     * Used when the statement is a block. The statement is actually a list of statements.
+     */
     static class Block extends Stmt {
         Block(List<Stmt> statements) {
             this.statements = statements;
@@ -18,6 +30,9 @@ public abstract class Stmt {
         final List<Stmt> statements;
     }
 
+    /**
+     * Used when the statement is just an expression.
+     */
     static class Expression extends Stmt {
         Expression(Expr expression) {
             this.expression = expression;
@@ -30,6 +45,9 @@ public abstract class Stmt {
         final Expr expression;
     }
 
+    /**
+     * Used when the statement is a function definition.
+     */
     static class Function extends Stmt {
         Function(Token token, List<Token> parameters, List<Stmt> body) {
             this.token = token;
@@ -46,6 +64,9 @@ public abstract class Stmt {
         final List<Stmt> body;
     }
 
+    /**
+     * Used when the statement is an 'if' statement.
+     */
     static class If extends Stmt {
         If(Expr condition, Stmt thenB, Stmt elseB) {
             this.condition = condition;
@@ -62,6 +83,9 @@ public abstract class Stmt {
         final Stmt elseB;
     }
 
+    /**
+     * Used when the statement is a print statement.
+     */
     static class Print extends Stmt {
         Print(Expr value) {
             this.value = value;
@@ -74,6 +98,9 @@ public abstract class Stmt {
         final Expr value;
     }
 
+    /**
+     * Used when the statement is a return statement.
+     */
     static class Return extends Stmt {
         Return(Token token, Expr value) {
             this.token = token;
@@ -88,6 +115,9 @@ public abstract class Stmt {
         final Expr value;
     }
 
+    /**
+     * Used when the statement contains a variable declaration/definition.
+     */
     static class Variable extends Stmt {
         Variable(Token token, Expr expression) {
             this.token = token;
@@ -102,6 +132,9 @@ public abstract class Stmt {
         final Expr expression;
     }
 
+    /**
+     * Used when the statement is a while statement.
+     */
     static class While extends Stmt {
         While(Expr condition, Stmt body) {
             this.condition = condition;

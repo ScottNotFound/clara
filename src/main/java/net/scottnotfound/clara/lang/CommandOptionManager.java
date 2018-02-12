@@ -1,4 +1,4 @@
-package net.scottnotfound.clara.interpret;
+package net.scottnotfound.clara.lang;
 
 import net.scottnotfound.clara.Clara;
 import net.scottnotfound.clara.init.CommandOptionInit;

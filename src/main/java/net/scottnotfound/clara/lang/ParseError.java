@@ -1,3 +1,3 @@
-package net.scottnotfound.clara.interpret;
+package net.scottnotfound.clara.lang;
 
 class ParseError extends RuntimeException {}
