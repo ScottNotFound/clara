@@ -6,35 +6,38 @@ package net.scottnotfound.clara.interpret;
  *
  * @param <R>
  */
-public interface Visitor<R> {
+interface IExprVisitor<R> {
 
     /**
      * Called by Expression.Literal
      * Used when the expression is a literal value such as a number or string.
      */
-    R visitLiteralExpr(Expression.Literal expression);
+    R visitExpr(Expr.Literal expression);
 
     /**
      * Called by Expression.Literal
      * Used when the expression is a grouping of other expressions, typically grouped with ().
      */
-    R visitGroupingExpr(Expression.Grouping expression);
+    R visitExpr(Expr.Grouping expression);
 
     /**
      * Called by Expression.Unary
      * Used when the expression is a unary operation such as '-' for negating a number or '!' for negating a boolean.
      */
-    R visitUnaryExpr(Expression.Unary expression);
+    R visitExpr(Expr.Unary expression);
 
     /**
      * Called by Expression.Binary
      * Used when the expression is a binary operation such as '4 + 5' or '6 > 3'
      */
-    R visitBinaryExpr(Expression.Binary expression);
+    R visitExpr(Expr.Binary expression);
 
-    /**
-     * Called by Expression.Operator
-     * Has no current use.
-     */
-    R visitOperatorExpr(Expression.Operator expression);
+    R visitExpr(Expr.Variable expression);
+
+    R visitExpr(Expr.Assign expression);
+
+    R visitExpr(Expr.Logical expression);
+
+    R visitExpr(Expr.Call expression);
+
 }

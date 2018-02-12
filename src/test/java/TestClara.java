@@ -1,7 +1,5 @@
-import net.scottnotfound.clara.interpret.*;
 import org.openscience.cdk.CDKConstants;
 import org.openscience.cdk.exception.InvalidSmilesException;
-import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
 import org.openscience.cdk.smiles.SmilesParser;
@@ -10,15 +8,6 @@ import uk.ac.cam.ch.wwmm.opsin.NameToStructure;
 public class TestClara {
 
     public static void main(String[] args) {
-
-
-        Lexer lexer = new Lexer("5 * 8");
-        lexer.lex();
-        Parser parser = new Parser(lexer.lex());
-        Expression expression = parser.parse();
-        System.out.println(new PrintAST().print(expression));
-        Interpreter interpreter = new Interpreter();
-        interpreter.interpret(expression);
 
     }
 
