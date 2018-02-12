@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Interpreter implements net.scottnotfound.clara.lang.IExprVisitor<Object>, net.scottnotfound.clara.lang.IStmtVisitor<Void> {
+public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void> {
 
     private Environment globals = new Environment();
     private Environment environment = globals;
@@ -25,13 +25,13 @@ public class Interpreter implements net.scottnotfound.clara.lang.IExprVisitor<Ob
         });
     }
 
-    public void interpret(List<net.scottnotfound.clara.lang.Stmt> statements) {
+    public void interpret(List<Stmt> statements) {
         try {
-            for (net.scottnotfound.clara.lang.Stmt statement : statements) {
+            for (Stmt statement : statements) {
                 execute(statement);
             }
-        } catch (net.scottnotfound.clara.lang.RuntimeError e) {
-            net.scottnotfound.clara.lang.Lang.runtimeError(e);
+        } catch (RuntimeError e) {
+            Lang.runtimeError(e);
         }
     }
 
@@ -43,15 +43,15 @@ public class Interpreter implements net.scottnotfound.clara.lang.IExprVisitor<Ob
         return expr.accept(this);
     }
 
-    private void execute(net.scottnotfound.clara.lang.Stmt statement) {
+    private void execute(Stmt statement) {
         statement.accept(this);
     }
 
-    void executeBlock(List<net.scottnotfound.clara.lang.Stmt> statements, Environment environment) {
+    void executeBlock(List<Stmt> statements, Environment environment) {
         Environment previous = this.environment;
         try {
             this.environment = environment;
-            for (net.scottnotfound.clara.lang.Stmt statement : statements) {
+            for (Stmt statement : statements) {
                 execute(statement);
             }
         } finally {
@@ -86,14 +86,14 @@ public class Interpreter implements net.scottnotfound.clara.lang.IExprVisitor<Ob
         if (operand instanceof Double) {
             return;
         }
-        throw new net.scottnotfound.clara.lang.RuntimeError(operator, "Operands must be a number.");
+        throw new RuntimeError(operator, "Operands must be a number.");
     }
 
     private void checkNumberOperands(Token operator, Object left, Object right) {
         if (left instanceof Double && right instanceof Double) {
             return;
         }
-        throw new net.scottnotfound.clara.lang.RuntimeError(operator, "Operands must be numbers.");
+        throw new RuntimeError(operator, "Operands must be numbers.");
     }
 
     private Object lookUpVariable(Token token, Expr expression) {
@@ -106,7 +106,7 @@ public class Interpreter implements net.scottnotfound.clara.lang.IExprVisitor<Ob
     }
 
     @Override
-    public Object visitExpr(net.scottnotfound.clara.lang.Expr.Assign expression) {
+    public Object visitExpr(Expr.Assign expression) {
         Object value = evaluate(expression.expression);
         Integer distance = locals.get(expression);
         if (distance != null) {
@@ -118,7 +118,7 @@ public class Interpreter implements net.scottnotfound.clara.lang.IExprVisitor<Ob
     }
 
     @Override
-    public Object visitExpr(net.scottnotfound.clara.lang.Expr.Binary expression) {
+    public Object visitExpr(Expr.Binary expression) {
         Object left = evaluate(expression.expr_left);
         Object right = evaluate(expression.expr_right);
 
@@ -164,7 +164,7 @@ public class Interpreter implements net.scottnotfound.clara.lang.IExprVisitor<Ob
                 if (left instanceof String && right instanceof String) {
                     return (String) left + (String) right;
                 }
-                throw new net.scottnotfound.clara.lang.RuntimeError(expression.operator, "Operands must be two numbers or two strings.");
+                throw new RuntimeError(expression.operator, "Operands must be two numbers or two strings.");
             }
         }
 
@@ -172,7 +172,7 @@ public class Interpreter implements net.scottnotfound.clara.lang.IExprVisitor<Ob
     }
 
     @Override
-    public Object visitExpr(net.scottnotfound.clara.lang.Expr.Call expression) {
+    public Object visitExpr(Expr.Call expression) {
         Object callee = evaluate(expression.callee);
 
         List<Object> arguments = new ArrayList<>();
@@ -181,13 +181,13 @@ public class Interpreter implements net.scottnotfound.clara.lang.IExprVisitor<Ob
         }
 
         if (!(callee instanceof Callable)) {
-            throw new net.scottnotfound.clara.lang.RuntimeError(expression.paren, "Can only call functions.");
+            throw new RuntimeError(expression.paren, "Can only call functions.");
         }
 
         Callable function = (Callable)callee;
 
         if (arguments.size() != function.arity()) {
-            throw new net.scottnotfound.clara.lang.RuntimeError(expression.paren, "Expected " + function.arity() +
+            throw new RuntimeError(expression.paren, "Expected " + function.arity() +
                     " arguments but got " + arguments.size() + ".");
         }
 
@@ -195,17 +195,17 @@ public class Interpreter implements net.scottnotfound.clara.lang.IExprVisitor<Ob
     }
 
     @Override
-    public Object visitExpr(net.scottnotfound.clara.lang.Expr.Grouping expression) {
+    public Object visitExpr(Expr.Grouping expression) {
         return evaluate(expression);
     }
 
     @Override
-    public Object visitExpr(net.scottnotfound.clara.lang.Expr.Literal expression) {
+    public Object visitExpr(Expr.Literal expression) {
         return expression.value;
     }
 
     @Override
-    public Object visitExpr(net.scottnotfound.clara.lang.Expr.Logical expression) {
+    public Object visitExpr(Expr.Logical expression) {
         Object left = evaluate(expression.left);
         if (expression.operator.type == TokenType.OR) {
             if (isTruthy(left)) {
@@ -220,7 +220,7 @@ public class Interpreter implements net.scottnotfound.clara.lang.IExprVisitor<Ob
     }
 
     @Override
-    public Object visitExpr(net.scottnotfound.clara.lang.Expr.Unary expression) {
+    public Object visitExpr(Expr.Unary expression) {
         Object right = evaluate(expression.expression);
 
         switch (expression.operator.type) {
@@ -235,31 +235,31 @@ public class Interpreter implements net.scottnotfound.clara.lang.IExprVisitor<Ob
     }
 
     @Override
-    public Object visitExpr(net.scottnotfound.clara.lang.Expr.Variable expression) {
+    public Object visitExpr(Expr.Variable expression) {
         return lookUpVariable(expression.token, expression);
     }
 
     @Override
-    public Void visitStmt(net.scottnotfound.clara.lang.Stmt.Block statement) {
+    public Void visitStmt(Stmt.Block statement) {
         executeBlock(statement.statements, new Environment(environment));
         return null;
     }
 
     @Override
-    public Void visitStmt(net.scottnotfound.clara.lang.Stmt.Expression statement) {
+    public Void visitStmt(Stmt.Expression statement) {
         evaluate(statement.expression);
         return null;
     }
 
     @Override
-    public Void visitStmt(net.scottnotfound.clara.lang.Stmt.Function statement) {
+    public Void visitStmt(Stmt.Function statement) {
         Function function = new Function(statement, environment);
         environment.define(statement.token.lexeme, function);
         return null;
     }
 
     @Override
-    public Void visitStmt(net.scottnotfound.clara.lang.Stmt.If statement) {
+    public Void visitStmt(Stmt.If statement) {
         if (isTruthy(evaluate(statement.condition))) {
             execute(statement.thenB);
         } else if (statement.elseB != null) {
@@ -269,14 +269,14 @@ public class Interpreter implements net.scottnotfound.clara.lang.IExprVisitor<Ob
     }
 
     @Override
-    public Void visitStmt(net.scottnotfound.clara.lang.Stmt.Print statement) {
+    public Void visitStmt(Stmt.Print statement) {
         Object value = evaluate(statement.value);
         System.out.println(stringify(value));
         return null;
     }
 
     @Override
-    public Void visitStmt(net.scottnotfound.clara.lang.Stmt.Return statement) {
+    public Void visitStmt(Stmt.Return statement) {
         Object value = null;
         if (statement.value != null) {
             value = evaluate(statement.value);
@@ -285,7 +285,7 @@ public class Interpreter implements net.scottnotfound.clara.lang.IExprVisitor<Ob
     }
 
     @Override
-    public Void visitStmt(net.scottnotfound.clara.lang.Stmt.Variable statement) {
+    public Void visitStmt(Stmt.Variable statement) {
         Object value = null;
         if (statement.expression != null) {
             value = evaluate(statement.expression);
@@ -296,7 +296,7 @@ public class Interpreter implements net.scottnotfound.clara.lang.IExprVisitor<Ob
     }
 
     @Override
-    public Void visitStmt(net.scottnotfound.clara.lang.Stmt.While statement) {
+    public Void visitStmt(Stmt.While statement) {
         while (isTruthy(evaluate(statement.condition))) {
             execute(statement.body);
         }

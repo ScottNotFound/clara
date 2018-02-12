@@ -4,10 +4,10 @@ import java.util.List;
 
 public class Function implements Callable {
 
-    private final net.scottnotfound.clara.lang.Stmt.Function declaration;
+    private final Stmt.Function declaration;
     private final Environment closure;
 
-    Function(net.scottnotfound.clara.lang.Stmt.Function declaration, Environment closure) {
+    Function(Stmt.Function declaration, Environment closure) {
         this.closure = closure;
         this.declaration = declaration;
     }
