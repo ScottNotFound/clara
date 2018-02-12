@@ -33,7 +33,7 @@ public class Lexer {
     }
 
 
-    public Lexer(String sourceSequence) {
+    Lexer(String sourceSequence) {
         this.sourceSequence = sourceSequence;
     }
 
@@ -83,8 +83,8 @@ public class Lexer {
             case '^':   addToken(TokenType.CARET);          break;
             case '&':   addToken(TokenType.AMPERSAND);      break;
             case '_':   addToken(TokenType.UNDERSCORE);     break;
-            case '=':   addToken(TokenType.EQUALS);         break;
             case '\'':  addToken(TokenType.QUOTEMK_S);      break;
+            case '=':   addToken(matchChar('=') ? TokenType.DOUBLE_EQUALS : TokenType.EQUALS);          break;
             case '!':   addToken(matchChar('=') ? TokenType.NOT_EQUALS : TokenType.EXCLAMK);            break;
             case '<':   addToken(matchChar('=') ? TokenType.LESS_EQUALS : TokenType.BRACKNQ_LEFT);      break;
             case '>':   addToken(matchChar('=') ? TokenType.GREATER_EQUALS : TokenType.BRACKNQ_RIGHT);  break;
