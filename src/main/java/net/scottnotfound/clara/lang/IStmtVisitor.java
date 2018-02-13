@@ -14,6 +14,11 @@ interface IStmtVisitor<R> {
     R visitStmt(Stmt.Block stmt);
 
     /**
+     * Used when the statement is a command issued to the program.
+     */
+    R visitStmt(Stmt.Command stmt);
+
+    /**
      * Used when the statement is just an expression.
      */
     R visitStmt(Stmt.Expression stmt);

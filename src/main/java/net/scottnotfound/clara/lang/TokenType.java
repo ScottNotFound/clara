@@ -31,7 +31,7 @@ public enum TokenType {
     BEGIN, REACT, REACTION,
     SCHEME, REACTANT, PRODUCT,
 
-    OPEN, CLOSE,
+    OPEN, CLOSE, COMMAND,
 
     EOF
 
