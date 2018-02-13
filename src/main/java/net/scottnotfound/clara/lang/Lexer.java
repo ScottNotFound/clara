@@ -29,7 +29,16 @@ public class Lexer {
         keywords.put("else", TokenType.ELSE);
         keywords.put("return", TokenType.RETURN);
         keywords.put("for", TokenType.FOR);
-
+        keywords.put("create", TokenType.CREATE);
+        keywords.put("start", TokenType.START);
+        keywords.put("end", TokenType.END);
+        keywords.put("finish", TokenType.FINISH);
+        keywords.put("begin", TokenType.BEGIN);
+        keywords.put("react", TokenType.REACT);
+        keywords.put("reactant", TokenType.REACTANT);
+        keywords.put("reaction", TokenType.REACTION);
+        keywords.put("scheme", TokenType.SCHEME);
+        keywords.put("product", TokenType.PRODUCT);
     }
 
 
