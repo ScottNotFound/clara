@@ -72,6 +72,23 @@ abstract class Expr {
     }
 
     /**
+     * Used when the statement contains a command issued to the program.
+     */
+    static class Command extends Expr {
+        Command(Token command, Expr expr) {
+            this.command = command;
+            this.expr = expr;
+        }
+
+        <R> R accept(IExprVisitor<R> visitor) {
+            return visitor.visitExpr(this);
+        }
+
+        final Token command;
+        final Expr expr;
+    }
+
+    /**
      * Used when the expression is a grouping of other expressions, typically grouped with ().
      */
     static class Grouping extends Expr {

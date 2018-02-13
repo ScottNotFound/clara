@@ -24,6 +24,11 @@ interface IExprVisitor<R> {
     R visitExpr(Expr.Call expr);
 
     /**
+     * Used when the expression contains a command issued to the program.
+     */
+    R visitExpr(Expr.Command expr);
+
+    /**
      * Used when the expression is a grouping of other expressions, typically grouped with ().
      */
     R visitExpr(Expr.Grouping expr);

@@ -10,6 +10,7 @@ public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void> {
     private Environment globals = new Environment();
     private Environment environment = globals;
     private final Map<Expr, Integer> locals = new HashMap<>();
+    private final CommandDistributor commandDistributor = new CommandDistributor();
 
     Interpreter() {
         globals.define("clock", new Callable() {
@@ -28,7 +29,7 @@ public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void> {
     public void interpret(List<Stmt> statements) {
         try {
             for (Stmt statement : statements) {
-                execute(statement);
+                executeStatement(statement);
             }
         } catch (RuntimeError e) {
             Lang.runtimeError(e);
@@ -39,11 +40,11 @@ public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void> {
         locals.put(expr, depth);
     }
 
-    private Object evaluate(Expr expr) {
+    private Object evaluateExpression(Expr expr) {
         return expr.accept(this);
     }
 
-    private void execute(Stmt statement) {
+    private void executeStatement(Stmt statement) {
         statement.accept(this);
     }
 
@@ -52,7 +53,7 @@ public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void> {
         try {
             this.environment = environment;
             for (Stmt statement : statements) {
-                execute(statement);
+                executeStatement(statement);
             }
         } finally {
             this.environment = previous;
@@ -107,7 +108,7 @@ public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void> {
 
     @Override
     public Object visitExpr(Expr.Assign expr) {
-        Object value = evaluate(expr.expression);
+        Object value = evaluateExpression(expr.expression);
         Integer distance = locals.get(expr);
         if (distance != null) {
             environment.assignAt(distance, expr.token, value);
@@ -119,8 +120,8 @@ public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void> {
 
     @Override
     public Object visitExpr(Expr.Binary expr) {
-        Object left = evaluate(expr.expr_left);
-        Object right = evaluate(expr.expr_right);
+        Object left = evaluateExpression(expr.expr_left);
+        Object right = evaluateExpression(expr.expr_right);
 
         switch (expr.operator.type) {
             case BRACKNQ_RIGHT: {
@@ -173,11 +174,11 @@ public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void> {
 
     @Override
     public Object visitExpr(Expr.Call expr) {
-        Object callee = evaluate(expr.callee);
+        Object callee = evaluateExpression(expr.callee);
 
         List<Object> arguments = new ArrayList<>();
         for (Expr argument : expr.arguments) {
-            arguments.add(evaluate(argument));
+            arguments.add(evaluateExpression(argument));
         }
 
         if (!(callee instanceof Callable)) {
@@ -195,8 +196,13 @@ public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void> {
     }
 
     @Override
+    public Object visitExpr(Expr.Command expr) {
+        return commandDistributor.carryOutCommand(expr);
+    }
+
+    @Override
     public Object visitExpr(Expr.Grouping expr) {
-        return evaluate(expr);
+        return evaluateExpression(expr);
     }
 
     @Override
@@ -206,7 +212,7 @@ public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void> {
 
     @Override
     public Object visitExpr(Expr.Logical expr) {
-        Object left = evaluate(expr.left);
+        Object left = evaluateExpression(expr.left);
         if (expr.operator.type == TokenType.OR) {
             if (isTruthy(left)) {
                 return left;
@@ -216,12 +222,12 @@ public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void> {
                 return left;
             }
         }
-        return evaluate(expr.right);
+        return evaluateExpression(expr.right);
     }
 
     @Override
     public Object visitExpr(Expr.Unary expr) {
-        Object right = evaluate(expr.expression);
+        Object right = evaluateExpression(expr.expression);
 
         switch (expr.operator.type) {
             case MINUS:
@@ -247,13 +253,13 @@ public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void> {
 
     @Override
     public Void visitStmt(Stmt.Command stmt) {
-        //todo: implement this for commands
+        evaluateExpression(new Expr.Command(stmt.command, stmt.expr));
         return null;
     }
 
     @Override
     public Void visitStmt(Stmt.Expression stmt) {
-        evaluate(stmt.expression);
+        evaluateExpression(stmt.expression);
         return null;
     }
 
@@ -266,17 +272,17 @@ public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void> {
 
     @Override
     public Void visitStmt(Stmt.If stmt) {
-        if (isTruthy(evaluate(stmt.condition))) {
-            execute(stmt.thenB);
+        if (isTruthy(evaluateExpression(stmt.condition))) {
+            executeStatement(stmt.thenB);
         } else if (stmt.elseB != null) {
-            execute(stmt.elseB);
+            executeStatement(stmt.elseB);
         }
         return null;
     }
 
     @Override
     public Void visitStmt(Stmt.Print stmt) {
-        Object value = evaluate(stmt.value);
+        Object value = evaluateExpression(stmt.value);
         System.out.println(stringify(value));
         return null;
     }
@@ -285,7 +291,7 @@ public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void> {
     public Void visitStmt(Stmt.Return stmt) {
         Object value = null;
         if (stmt.value != null) {
-            value = evaluate(stmt.value);
+            value = evaluateExpression(stmt.value);
         }
         throw new Return(value);
     }
@@ -294,7 +300,7 @@ public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void> {
     public Void visitStmt(Stmt.Variable stmt) {
         Object value = null;
         if (stmt.expression != null) {
-            value = evaluate(stmt.expression);
+            value = evaluateExpression(stmt.expression);
         }
 
         environment.define(stmt.token.lexeme, value);
@@ -303,8 +309,8 @@ public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void> {
 
     @Override
     public Void visitStmt(Stmt.While stmt) {
-        while (isTruthy(evaluate(stmt.condition))) {
-            execute(stmt.body);
+        while (isTruthy(evaluateExpression(stmt.condition))) {
+            executeStatement(stmt.body);
         }
         return null;
     }

@@ -34,9 +34,9 @@ abstract class Stmt {
      * Used when the statement is a command issued to the program.
      */
     static class Command extends Stmt {
-        Command(Token command, Stmt stmt) {
+        Command(Token command, Expr expr) {
             this.command = command;
-            this.stmt = stmt;
+            this.expr = expr;
         }
 
         <R> R accept(IStmtVisitor<R> visitor) {
@@ -44,7 +44,7 @@ abstract class Stmt {
         }
 
         final Token command;
-        final Stmt stmt;
+        final Expr expr;
     }
 
     /**
