@@ -21,46 +21,46 @@ public class PrintAST implements IExprVisitor<String> {
 
 
     @Override
-    public String visitExpr(Expr.Literal expression) {
-        if (expression.value == null) {
+    public String visitExpr(Expr.Literal expr) {
+        if (expr.value == null) {
             return "null";
         } else {
-            return expression.value.toString();
+            return expr.value.toString();
         }
     }
 
     @Override
-    public String visitExpr(Expr.Grouping expression) {
-        return parenthesize("group", expression.expression);
+    public String visitExpr(Expr.Grouping expr) {
+        return parenthesize("group", expr.expression);
     }
 
     @Override
-    public String visitExpr(Expr.Unary expression) {
-        return parenthesize(expression.operator.lexeme, expression.expression);
+    public String visitExpr(Expr.Unary expr) {
+        return parenthesize(expr.operator.lexeme, expr.expression);
     }
 
     @Override
-    public String visitExpr(Expr.Binary expression) {
-        return parenthesize(expression.operator.lexeme, expression.expr_left, expression.expr_right);
+    public String visitExpr(Expr.Binary expr) {
+        return parenthesize(expr.operator.lexeme, expr.expr_left, expr.expr_right);
     }
 
     @Override
-    public String visitExpr(Expr.Variable expression) {
+    public String visitExpr(Expr.Variable expr) {
         return null;
     }
 
     @Override
-    public String visitExpr(Expr.Assign expression) {
+    public String visitExpr(Expr.Assign expr) {
         return null;
     }
 
     @Override
-    public String visitExpr(Expr.Logical expression) {
+    public String visitExpr(Expr.Logical expr) {
         return null;
     }
 
     @Override
-    public String visitExpr(Expr.Call expression) {
+    public String visitExpr(Expr.Call expr) {
         return null;
     }
 

@@ -17,36 +17,36 @@ public class Resolver implements IExprVisitor<Void>, IStmtVisitor<Void> {
 
 
     @Override
-    public Void visitExpr(Expr.Literal expression) {
+    public Void visitExpr(Expr.Literal expr) {
         return null;
     }
 
     @Override
-    public Void visitExpr(Expr.Grouping expression) {
-        resolve(expression.expression);
+    public Void visitExpr(Expr.Grouping expr) {
+        resolve(expr.expression);
         return null;
     }
 
     @Override
-    public Void visitExpr(Expr.Unary expression) {
-        resolve(expression.expression);
+    public Void visitExpr(Expr.Unary expr) {
+        resolve(expr.expression);
         return null;
     }
 
     @Override
-    public Void visitExpr(Expr.Binary expression) {
-        resolve(expression.expr_left);
-        resolve(expression.expr_right);
+    public Void visitExpr(Expr.Binary expr) {
+        resolve(expr.expr_left);
+        resolve(expr.expr_right);
         return null;
     }
 
     @Override
-    public Void visitExpr(Expr.Variable expression) {
-        if (!scopes.isEmpty() && scopes.peek().get(expression.token.lexeme) == Boolean.FALSE) {
-            Lang.error(expression.token, "Cannot read local variable in its own initializer.");
+    public Void visitExpr(Expr.Variable expr) {
+        if (!scopes.isEmpty() && scopes.peek().get(expr.token.lexeme) == Boolean.FALSE) {
+            Lang.error(expr.token, "Cannot read local variable in its own initializer.");
         }
 
-        resolveLocal(expression, expression.token);
+        resolveLocal(expr, expr.token);
         return null;
     }
 
@@ -60,32 +60,32 @@ public class Resolver implements IExprVisitor<Void>, IStmtVisitor<Void> {
     }
 
     @Override
-    public Void visitExpr(Expr.Assign expression) {
-        resolve(expression.expression);
-        resolveLocal(expression, expression.token);
+    public Void visitExpr(Expr.Assign expr) {
+        resolve(expr.expression);
+        resolveLocal(expr, expr.token);
         return null;
     }
 
     @Override
-    public Void visitExpr(Expr.Logical expression) {
-        resolve(expression.left);
-        resolve(expression.right);
+    public Void visitExpr(Expr.Logical expr) {
+        resolve(expr.left);
+        resolve(expr.right);
         return null;
     }
 
     @Override
-    public Void visitExpr(Expr.Call expression) {
-        resolve(expression.callee);
-        for (Expr argument : expression.arguments) {
+    public Void visitExpr(Expr.Call expr) {
+        resolve(expr.callee);
+        for (Expr argument : expr.arguments) {
             resolve(argument);
         }
         return null;
     }
 
     @Override
-    public Void visitStmt(Stmt.Block statement) {
+    public Void visitStmt(Stmt.Block stmt) {
         beginScope();
-        resolve(statement.statements);
+        resolve(stmt.statements);
         endScope();
         return null;
     }
@@ -113,16 +113,16 @@ public class Resolver implements IExprVisitor<Void>, IStmtVisitor<Void> {
     }
 
     @Override
-    public Void visitStmt(Stmt.Expression statement) {
-        resolve(statement.expression);
+    public Void visitStmt(Stmt.Expression stmt) {
+        resolve(stmt.expression);
         return null;
     }
 
     @Override
-    public Void visitStmt(Stmt.Function statement) {
-        declare(statement.token);
-        define(statement.token);
-        resolveFunction(statement, FunctionType.FUNCTION);
+    public Void visitStmt(Stmt.Function stmt) {
+        declare(stmt.token);
+        define(stmt.token);
+        resolveFunction(stmt, FunctionType.FUNCTION);
         return null;
     }
 
@@ -140,39 +140,39 @@ public class Resolver implements IExprVisitor<Void>, IStmtVisitor<Void> {
     }
 
     @Override
-    public Void visitStmt(Stmt.If statement) {
-        resolve(statement.condition);
-        resolve(statement.thenB);
-        if (statement.elseB != null) {
-            resolve(statement.elseB);
+    public Void visitStmt(Stmt.If stmt) {
+        resolve(stmt.condition);
+        resolve(stmt.thenB);
+        if (stmt.elseB != null) {
+            resolve(stmt.elseB);
         }
         return null;
     }
 
     @Override
-    public Void visitStmt(Stmt.Print statement) {
-        resolve(statement.value);
+    public Void visitStmt(Stmt.Print stmt) {
+        resolve(stmt.value);
         return null;
     }
 
     @Override
-    public Void visitStmt(Stmt.Return statement) {
+    public Void visitStmt(Stmt.Return stmt) {
         if (currentFunction == FunctionType.NONE) {
-            Lang.error(statement.token, "Cannot return from top-level code.");
+            Lang.error(stmt.token, "Cannot return from top-level code.");
         }
-        if (statement.value != null) {
-            resolve(statement.value);
+        if (stmt.value != null) {
+            resolve(stmt.value);
         }
         return null;
     }
 
     @Override
-    public Void visitStmt(Stmt.Variable statement) {
-        declare(statement.token);
-        if (statement.expression != null) {
-            resolve(statement.expression);
+    public Void visitStmt(Stmt.Variable stmt) {
+        declare(stmt.token);
+        if (stmt.expression != null) {
+            resolve(stmt.expression);
         }
-        define(statement.token);
+        define(stmt.token);
         return null;
     }
 
@@ -195,9 +195,9 @@ public class Resolver implements IExprVisitor<Void>, IStmtVisitor<Void> {
     }
 
     @Override
-    public Void visitStmt(Stmt.While statement) {
-        resolve(statement.condition);
-        resolve(statement.body);
+    public Void visitStmt(Stmt.While stmt) {
+        resolve(stmt.condition);
+        resolve(stmt.body);
         return null;
     }
 }
