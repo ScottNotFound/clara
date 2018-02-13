@@ -29,7 +29,14 @@ public class Parser {
 
     }
 
+    private Stmt statementDefault() {
+        return expressionStatement();
+    }
+
     private Stmt statement() {
+        if (matchToken(TokenType.COMMAND)) {
+            return commandStatement();
+        }
         if (matchToken(TokenType.FOR)) {
             return forStatement();
         }
@@ -48,7 +55,13 @@ public class Parser {
         if (matchToken(TokenType.BRACE_LEFT)) {
             return blockStatement();
         }
-        return expressionStatement();
+        return statementDefault();
+    }
+
+    private Stmt commandStatement() {
+        //todo: whatever the heck a command is made of
+        synchronize();
+        return null;
     }
 
     private Stmt forStatement() {

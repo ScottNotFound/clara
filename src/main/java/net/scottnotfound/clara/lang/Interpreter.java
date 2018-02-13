@@ -246,6 +246,12 @@ public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void> {
     }
 
     @Override
+    public Void visitStmt(Stmt.Command stmt) {
+        //todo: implement this for commands
+        return null;
+    }
+
+    @Override
     public Void visitStmt(Stmt.Expression stmt) {
         evaluate(stmt.expression);
         return null;

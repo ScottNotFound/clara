@@ -39,6 +39,8 @@ public class Lexer {
         keywords.put("reaction", TokenType.REACTION);
         keywords.put("scheme", TokenType.SCHEME);
         keywords.put("product", TokenType.PRODUCT);
+        keywords.put("open", TokenType.OPEN);
+        keywords.put("close", TokenType.CLOSE);
         keywords.put("command", TokenType.COMMAND);
 
     }
