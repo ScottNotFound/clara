@@ -32,6 +32,7 @@ public enum TokenType {
     SCHEME, REACTANT, PRODUCT,
 
     OPEN, CLOSE, COMMAND,
+    HELP,
 
     EOF
 

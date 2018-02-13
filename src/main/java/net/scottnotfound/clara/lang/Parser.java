@@ -30,6 +30,9 @@ public class Parser {
     }
 
     private Stmt statementDefault() {
+        if (matchToken(TokenType.SEMICOLON)) {
+            return new Stmt.Expression(new Expr.Literal(null));
+        }
         return expressionStatement();
     }
 
@@ -59,9 +62,9 @@ public class Parser {
     }
 
     private Stmt commandStatement() {
-        //todo: whatever the heck a command is made of
-        synchronize();
-        return null;
+        Expr expr = expression();
+        requireToken(TokenType.SEMICOLON, "Expect ';' after value.");
+        return new Stmt.Expression(expr);
     }
 
     private Stmt forStatement() {
@@ -119,6 +122,9 @@ public class Parser {
 
     private Stmt printStatement() {
         Expr value = expression();
+        if (value == null) {
+            value = new Expr.Literal("");
+        }
         requireToken(TokenType.SEMICOLON, "Expect ';' after value.");
         return new Stmt.Print(value);
     }

@@ -64,4 +64,9 @@ public class PrintAST implements IExprVisitor<String> {
         return null;
     }
 
+    @Override
+    public String visitExpr(Expr.Command expr) {
+        return null;
+    }
+
 }

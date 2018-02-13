@@ -17,7 +17,8 @@ public class Lexer {
 
     static {
         keywords = new HashMap<>();
-        keywords.put("print", TokenType.PRINT);
+
+        // base keywords
         keywords.put("var", TokenType.VAR);
         keywords.put("let", TokenType.VAR);
         keywords.put("if", TokenType.IF);
@@ -29,6 +30,12 @@ public class Lexer {
         keywords.put("else", TokenType.ELSE);
         keywords.put("return", TokenType.RETURN);
         keywords.put("for", TokenType.FOR);
+
+        // built in operations
+        keywords.put("print", TokenType.PRINT);
+
+        // commands
+        keywords.put("help", TokenType.HELP);
         keywords.put("create", TokenType.CREATE);
         keywords.put("start", TokenType.START);
         keywords.put("end", TokenType.END);

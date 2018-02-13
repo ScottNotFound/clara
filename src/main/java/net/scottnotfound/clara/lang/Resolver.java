@@ -83,10 +83,22 @@ public class Resolver implements IExprVisitor<Void>, IStmtVisitor<Void> {
     }
 
     @Override
+    public Void visitExpr(Expr.Command expr) {
+        resolve(expr.expr);
+        return null;
+    }
+
+    @Override
     public Void visitStmt(Stmt.Block stmt) {
         beginScope();
         resolve(stmt.statements);
         endScope();
+        return null;
+    }
+
+    @Override
+    public Void visitStmt(Stmt.Command stmt) {
+        resolve(stmt.expr);
         return null;
     }
 
