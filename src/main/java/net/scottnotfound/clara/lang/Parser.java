@@ -347,7 +347,7 @@ public class Parser {
      * Checks and parses the token. This has the highest priority so goes lowest in the tree.
      */
     private Expr primaryParseCheck() {
-        if (matchToken(TokenType.NUMBER, TokenType.STRING)) {
+        if (matchToken(TokenType.NUMBER, TokenType.STRING, TokenType.BOOLEAN)) {
             return new Expr.Literal(peekPrevious().literal);
         }
 

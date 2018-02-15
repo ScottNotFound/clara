@@ -22,6 +22,7 @@ public enum TokenType {
     DOUBLE_EQUALS, AND, OR,
 
     STRING, NUMBER, IDENTIFIER,
+    BOOLEAN,
 
     PRINT, RETURN, IF, WHILE,
     VAR, CONST, ELSE, FOR,

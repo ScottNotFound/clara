@@ -186,7 +186,17 @@ public class Lexer {
             type = TokenType.IDENTIFIER;
         }
 
-        addToken(type);
+        switch (text) {
+            case "true":
+                addToken(TokenType.BOOLEAN, true);
+                break;
+            case "false":
+                addToken(TokenType.BOOLEAN, false);
+                break;
+            default:
+                addToken(type);
+                break;
+        }
     }
 
     private boolean matchChar(char expected) {
