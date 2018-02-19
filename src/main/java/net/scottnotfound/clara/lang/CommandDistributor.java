@@ -1,6 +1,6 @@
 package net.scottnotfound.clara.lang;
 
-class CommandDistributor {
+class CommandDistributor implements ICmdVisitor<Void> {
 
     CommandDistributor() {
 
@@ -10,18 +10,8 @@ class CommandDistributor {
         return null;
     }
 
-    void checkCommandToken(Token token) {
-
-        switch (token.lexeme) {
-            case "help":
-
-
-            default:
-
-
-
-        }
-
+    @Override
+    public Void visitCmd(Cmd.Help cmd) {
+        return null;
     }
-
 }

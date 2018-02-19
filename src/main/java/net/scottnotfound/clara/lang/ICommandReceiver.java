@@ -1,4 +1,4 @@
-package net.scottnotfound.clara.command;
+package net.scottnotfound.clara.lang;
 
 /**
  * The class implementing this will be sent commands

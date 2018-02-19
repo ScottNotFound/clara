@@ -1,6 +1,6 @@
 package net.scottnotfound.clara.reaction;
 
-import net.scottnotfound.clara.command.ICommandReceiver;
+import net.scottnotfound.clara.lang.ICommandReceiver;
 
 public class ReactionEngine implements ICommandReceiver {
 
