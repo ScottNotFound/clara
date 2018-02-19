@@ -1,12 +1,12 @@
-package net.scottnotfound.clara.lang;
+package net.scottnotfound.clara.command;
 
 /**
  * The class implementing this will be sent commands
  */
 public interface ICommandReceiver {
 
-    void execute();
+    void executeCommand();
 
-    void refuse();
+    void refuseCommand();
 
 }

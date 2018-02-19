@@ -1,9 +1,6 @@
 package net.scottnotfound.clara.lang;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Lexer {
 
@@ -14,6 +11,7 @@ public class Lexer {
     private int line = 1;
 
     private static final Map<String, TokenType> keywords;
+    private static final Set<String> commands;
 
     static {
         keywords = new HashMap<>();
@@ -34,21 +32,25 @@ public class Lexer {
         // built in operations
         keywords.put("print", TokenType.PRINT);
 
+
+
         // commands
-        keywords.put("help", TokenType.HELP);
-        keywords.put("create", TokenType.CREATE);
-        keywords.put("start", TokenType.START);
-        keywords.put("end", TokenType.END);
-        keywords.put("finish", TokenType.FINISH);
-        keywords.put("begin", TokenType.BEGIN);
-        keywords.put("react", TokenType.REACT);
-        keywords.put("reactant", TokenType.REACTANT);
-        keywords.put("reaction", TokenType.REACTION);
-        keywords.put("scheme", TokenType.SCHEME);
-        keywords.put("product", TokenType.PRODUCT);
-        keywords.put("open", TokenType.OPEN);
-        keywords.put("close", TokenType.CLOSE);
-        keywords.put("command", TokenType.COMMAND);
+        commands = new HashSet<>();
+
+        commands.add("help");
+        commands.add("create");
+        commands.add("start");
+        commands.add("end");
+        commands.add("finish");
+        commands.add("begin");
+        commands.add("react");
+        commands.add("reactant");
+        commands.add("reaction");
+        commands.add("scheme");
+        commands.add("product");
+        commands.add("open");
+        commands.add("close");
+        commands.add("command");
 
     }
 
@@ -184,6 +186,9 @@ public class Lexer {
         TokenType type = keywords.get(text.toLowerCase());
         if (type == null) {
             type = TokenType.IDENTIFIER;
+        }
+        if (commands.contains(text.toLowerCase())) {
+            type = TokenType.COMMAND;
         }
 
         switch (text) {

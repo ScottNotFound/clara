@@ -28,12 +28,7 @@ public enum TokenType {
     VAR, CONST, ELSE, FOR,
     FUN,
 
-    CREATE, START, END, FINISH,
-    BEGIN, REACT, REACTION,
-    SCHEME, REACTANT, PRODUCT,
-
-    OPEN, CLOSE, COMMAND,
-    HELP,
+    COMMAND,
 
     EOF
 

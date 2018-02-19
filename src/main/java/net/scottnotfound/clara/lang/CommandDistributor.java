@@ -10,4 +10,18 @@ class CommandDistributor {
         return null;
     }
 
+    void checkCommandToken(Token token) {
+
+        switch (token.lexeme) {
+            case "help":
+
+
+            default:
+
+
+
+        }
+
+    }
+
 }
