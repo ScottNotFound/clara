@@ -133,7 +133,7 @@ abstract class Stmt {
     }
 
     /**
-     * Used when the statement contains a variable declaration/definition.
+     * Used when the statement is a variable declaration/definition.
      */
     static class Variable extends Stmt {
         Variable(Token token, Expr expression) {

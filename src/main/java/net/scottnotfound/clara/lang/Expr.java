@@ -72,7 +72,7 @@ abstract class Expr {
     }
 
     /**
-     * Used when the statement contains a command issued to the program.
+     * Used when the expression is a command issued to the program.
      */
     static class Command extends Expr {
         Command(Token command, Expr expr) {

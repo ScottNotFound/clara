@@ -9,10 +9,44 @@ package net.scottnotfound.clara.lang;
  */
 abstract class Cmd {
 
-
+    /**
+     * Call to delegate action to the specific visit method.
+     */
     abstract <R> R accept(ICmdVisitor<R> visitor);
 
+    /**
+     * Used when the command contains an assignment.
+     */
+    static class Assign extends Cmd {
+        Assign() {
 
+        }
+
+        <R> R accept(ICmdVisitor<R> visitor) {
+            return visitor.visitCmd(this);
+        }
+
+
+    }
+
+    /**
+     * Used when the commands contains flags.
+     */
+    static class Flag extends Cmd {
+        Flag() {
+
+        }
+
+        <R> R accept(ICmdVisitor<R> visitor) {
+            return visitor.visitCmd(this);
+        }
+
+
+    }
+
+    /**
+     * Used when the command is a help command.
+     */
     static class Help extends Cmd {
         Help() {
 
