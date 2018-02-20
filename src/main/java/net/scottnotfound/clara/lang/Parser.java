@@ -6,24 +6,37 @@ import java.util.List;
 
 public class Parser {
 
-    private final List<Token> tokenSequence;
+    private List<Token> tokenSequence;
     private int current = 0;
-    private final boolean commandMode;
+    private boolean commandMode;
 
-    Parser(List<Token> tokenSequence) {
-        this.tokenSequence = tokenSequence;
-        this.commandMode = false;
+    Parser() {}
+
+    public static List<Stmt> staticParse(List<Token> tokenSequence) {
+        return staticParse(tokenSequence, false);
     }
 
-    Parser(List<Token> tokenSequence, boolean commandMode) {
+    public static List<Stmt> staticParse(List<Token> tokenSequence, boolean commandMode) {
+        Parser parser = new Parser();
+        return parser.parse(tokenSequence, commandMode);
+    }
+
+    public List<Stmt> parse(List<Token> tokenSequence) {
+        return parse(tokenSequence, false);
+    }
+
+    public List<Stmt> parse(List<Token> tokenSequence, boolean commandMode) {
         this.tokenSequence = tokenSequence;
         this.commandMode = commandMode;
+        this.current = 0;
+
+        return parse();
     }
 
     /**
      * Parses the sequence of tokens contained by the Parser into a list of statements to execute.
      */
-    public List<Stmt> parse() {
+    private List<Stmt> parse() {
         try {
             List<Stmt> statements = new ArrayList<>();
             while (notEOF()) {

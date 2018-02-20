@@ -55,8 +55,11 @@ public class Lexer {
     }
 
 
-    Lexer(String sourceSequence) {
-        this.sourceSequence = sourceSequence;
+    Lexer() {}
+
+    public static List<Token> staticLex(String source) {
+        Lexer lexer = new Lexer();
+        return lexer.lex(source);
     }
 
     public List<Token> lex(String source) {
@@ -68,7 +71,7 @@ public class Lexer {
         return lex();
     }
 
-    public List<Token> lex() {
+    private List<Token> lex() {
         while (!isAtEnd()) {
             start = current;
             lexToken();

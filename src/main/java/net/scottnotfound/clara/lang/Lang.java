@@ -11,6 +11,9 @@ import java.util.List;
 public class Lang {
 
     private static final Interpreter interpreter = new Interpreter();
+    private static final Parser parser = new Parser();
+    private static final Lexer lexer = new Lexer();
+
     private static boolean hadError = false;
     private static boolean hadRuntimeError = false;
 
@@ -47,10 +50,7 @@ public class Lang {
     }
 
     private static void run(String source) {
-        Lexer lexer = new Lexer(source);
-        List<Token> tokens = lexer.lex();
-        Parser parser = new Parser(tokens, true);
-        List<Stmt> stmts = parser.parse();
+        List<Stmt> stmts = parser.parse(lexer.lex(source));
 
         if (hadError) {
             return;
