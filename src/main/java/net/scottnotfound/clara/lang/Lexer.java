@@ -31,6 +31,7 @@ public class Lexer {
 
         // built in operations
         keywords.put("print", TokenType.PRINT);
+        keywords.put("echo", TokenType.PRINT);
 
 
 

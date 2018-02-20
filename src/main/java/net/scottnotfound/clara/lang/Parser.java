@@ -8,7 +8,7 @@ public class Parser {
 
     private List<Token> tokenSequence;
     private int current = 0;
-    private boolean commandMode;
+    boolean commandMode;
 
     Parser() {}
 
@@ -22,7 +22,7 @@ public class Parser {
     }
 
     public List<Stmt> parse(List<Token> tokenSequence) {
-        return parse(tokenSequence, false);
+        return parse(tokenSequence, this.commandMode);
     }
 
     public List<Stmt> parse(List<Token> tokenSequence, boolean commandMode) {

@@ -28,6 +28,8 @@ public class Lang {
     }
 
     private static void runFile(String path) throws IOException {
+        parser.commandMode = false;
+
         byte[] bytes = Files.readAllBytes(Paths.get(path));
         run(new String(bytes, Charset.defaultCharset()));
         if (hadError) {
@@ -39,6 +41,8 @@ public class Lang {
     }
 
     private static void runPrompt() throws IOException {
+        parser.commandMode = true;
+
         InputStreamReader input = new InputStreamReader(System.in);
         BufferedReader reader = new BufferedReader(input);
 
