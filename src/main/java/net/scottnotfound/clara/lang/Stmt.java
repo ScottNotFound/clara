@@ -34,17 +34,15 @@ abstract class Stmt {
      * Used when the statement is a command issued to the program.
      */
     static class Command extends Stmt {
-        Command(Token command, Expr expr) {
-            this.command = command;
-            this.expr = expr;
+        Command(Cmd cmd) {
+            this.cmd = cmd;
         }
 
         <R> R accept(IStmtVisitor<R> visitor) {
             return visitor.visitStmt(this);
         }
 
-        final Token command;
-        final Expr expr;
+        final Cmd cmd;
     }
 
     /**

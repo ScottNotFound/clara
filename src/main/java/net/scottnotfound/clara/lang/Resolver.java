@@ -84,7 +84,6 @@ public class Resolver implements IExprVisitor<Void>, IStmtVisitor<Void> {
 
     @Override
     public Void visitExpr(Expr.Command expr) {
-        resolve(expr.expr);
         return null;
     }
 
@@ -98,7 +97,6 @@ public class Resolver implements IExprVisitor<Void>, IStmtVisitor<Void> {
 
     @Override
     public Void visitStmt(Stmt.Command stmt) {
-        resolve(stmt.expr);
         return null;
     }
 

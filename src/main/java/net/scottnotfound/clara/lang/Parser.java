@@ -62,9 +62,9 @@ public class Parser {
     }
 
     private Stmt commandStatement() {
-        Expr expr = expression();
+        Cmd cmd = command();
         requireToken(TokenType.SEMICOLON, "Expect ';' after value.");
-        return new Stmt.Expression(expr);
+        return new Stmt.Command(cmd);
     }
 
     private Stmt forStatement() {
@@ -362,6 +362,21 @@ public class Parser {
         }
 
         return null;
+    }
+
+    /**
+     * Begins a series of checks to parse the command.
+     */
+    private Cmd command() {
+        Token commandToken = peekPrevious();
+
+        switch (commandToken.lexeme) {
+            case "help":
+                Token commandHelp = requireToken(TokenType.COMMAND, "no such command");
+                return new Cmd.Help();
+        }
+
+        return new Cmd.Help();
     }
 
     /**

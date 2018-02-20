@@ -6,17 +6,8 @@ class CommandDistributor implements ICmdVisitor<Void> {
 
     }
 
-    Object carryOutCommand(Expr.Command command) {
-        return null;
-    }
-
-    @Override
-    public Void visitCmd(Cmd.Assign cmd) {
-        return null;
-    }
-
-    @Override
-    public Void visitCmd(Cmd.Flag cmd) {
+    Object carryOutCommand(Cmd command) {
+        command.accept(this);
         return null;
     }
 

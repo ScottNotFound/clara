@@ -134,7 +134,7 @@ public class Lexer {
                 if (isDigit(c)) {
                     collectNumber();
                 } else if (isAlpha(c)) {
-                    collectIdentifier();
+                    collectOther();
                 } else {
                     Lang.error(line, "Unexpected character.");
                 }
@@ -176,21 +176,25 @@ public class Lexer {
         addToken(TokenType.NUMBER, Double.parseDouble(sourceSequence.substring(start, current)));
     }
 
-    private void collectIdentifier() {
+    private void collectOther() {
         while (isAlphaNumeric(peekCurrent())) {
-            advanceChar();
+            current++;
         }
 
         String text = sourceSequence.substring(start, current);
 
+        // collect identifier
         TokenType type = keywords.get(text.toLowerCase());
         if (type == null) {
             type = TokenType.IDENTIFIER;
         }
+
+        // collect command
         if (commands.contains(text.toLowerCase())) {
             type = TokenType.COMMAND;
         }
 
+        // collect boolean literal
         switch (text) {
             case "true":
                 addToken(TokenType.BOOLEAN, true);

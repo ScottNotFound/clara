@@ -197,7 +197,7 @@ public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void> {
 
     @Override
     public Object visitExpr(Expr.Command expr) {
-        return commandDistributor.carryOutCommand(expr);
+        return commandDistributor.carryOutCommand(expr.cmd);
     }
 
     @Override
@@ -253,7 +253,7 @@ public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void> {
 
     @Override
     public Void visitStmt(Stmt.Command stmt) {
-        evaluateExpression(new Expr.Command(stmt.command, stmt.expr));
+        commandDistributor.carryOutCommand(stmt.cmd);
         return null;
     }
 

@@ -75,17 +75,15 @@ abstract class Expr {
      * Used when the expression is a command issued to the program.
      */
     static class Command extends Expr {
-        Command(Token command, Expr expr) {
-            this.command = command;
-            this.expr = expr;
+        Command(Cmd cmd) {
+            this.cmd = cmd;
         }
 
         <R> R accept(IExprVisitor<R> visitor) {
             return visitor.visitExpr(this);
         }
 
-        final Token command;
-        final Expr expr;
+        final Cmd cmd;
     }
 
     /**
