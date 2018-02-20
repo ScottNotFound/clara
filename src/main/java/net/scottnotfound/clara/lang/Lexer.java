@@ -4,8 +4,8 @@ import java.util.*;
 
 public class Lexer {
 
-    private final String sourceSequence;
-    private final List<Token> tokenSequence = new ArrayList<>();
+    private String sourceSequence;
+    private List<Token> tokenSequence = new ArrayList<>();
     private int start = 0;
     private int current = 0;
     private int line = 1;
@@ -57,6 +57,15 @@ public class Lexer {
 
     Lexer(String sourceSequence) {
         this.sourceSequence = sourceSequence;
+    }
+
+    public List<Token> lex(String source) {
+        this.sourceSequence = source;
+        this.tokenSequence = new ArrayList<>();
+        this.line = 1;
+        this.start = 0;
+        this.current = 0;
+        return lex();
     }
 
     public List<Token> lex() {

@@ -49,7 +49,7 @@ public class Lang {
     private static void run(String source) {
         Lexer lexer = new Lexer(source);
         List<Token> tokens = lexer.lex();
-        Parser parser = new Parser(tokens);
+        Parser parser = new Parser(tokens, true);
         List<Stmt> stmts = parser.parse();
 
         if (hadError) {

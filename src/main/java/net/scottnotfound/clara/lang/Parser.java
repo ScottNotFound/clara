@@ -8,9 +8,16 @@ public class Parser {
 
     private final List<Token> tokenSequence;
     private int current = 0;
+    private final boolean commandMode;
 
     Parser(List<Token> tokenSequence) {
         this.tokenSequence = tokenSequence;
+        this.commandMode = false;
+    }
+
+    Parser(List<Token> tokenSequence, boolean commandMode) {
+        this.tokenSequence = tokenSequence;
+        this.commandMode = commandMode;
     }
 
     /**
@@ -63,7 +70,9 @@ public class Parser {
 
     private Stmt commandStatement() {
         Cmd cmd = command();
-        requireToken(TokenType.SEMICOLON, "Expect ';' after value.");
+        if (!commandMode) {
+            requireToken(TokenType.SEMICOLON, "Expect ';' after value.");
+        }
         return new Stmt.Command(cmd);
     }
 
@@ -125,7 +134,9 @@ public class Parser {
         if (value == null) {
             value = new Expr.Literal("");
         }
-        requireToken(TokenType.SEMICOLON, "Expect ';' after value.");
+        if (!commandMode) {
+            requireToken(TokenType.SEMICOLON, "Expect ';' after value.");
+        }
         return new Stmt.Print(value);
     }
 
