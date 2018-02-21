@@ -72,6 +72,21 @@ abstract class Expr {
     }
 
     /**
+     * Used when the expression is a command issued to the program.
+     */
+    static class Command extends Expr {
+        Command(Cmd cmd) {
+            this.cmd = cmd;
+        }
+
+        <R> R accept(IExprVisitor<R> visitor) {
+            return visitor.visitExpr(this);
+        }
+
+        final Cmd cmd;
+    }
+
+    /**
      * Used when the expression is a grouping of other expressions, typically grouped with ().
      */
     static class Grouping extends Expr {

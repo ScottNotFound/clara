@@ -11,6 +11,9 @@ import java.util.List;
 public class Lang {
 
     private static final Interpreter interpreter = new Interpreter();
+    private static final Parser parser = new Parser();
+    private static final Lexer lexer = new Lexer();
+
     private static boolean hadError = false;
     private static boolean hadRuntimeError = false;
 
@@ -25,6 +28,8 @@ public class Lang {
     }
 
     private static void runFile(String path) throws IOException {
+        parser.commandMode = false;
+
         byte[] bytes = Files.readAllBytes(Paths.get(path));
         run(new String(bytes, Charset.defaultCharset()));
         if (hadError) {
@@ -36,6 +41,8 @@ public class Lang {
     }
 
     private static void runPrompt() throws IOException {
+        parser.commandMode = true;
+
         InputStreamReader input = new InputStreamReader(System.in);
         BufferedReader reader = new BufferedReader(input);
 
@@ -47,10 +54,7 @@ public class Lang {
     }
 
     private static void run(String source) {
-        Lexer lexer = new Lexer(source);
-        List<Token> tokens = lexer.lex();
-        Parser parser = new Parser(tokens);
-        List<Stmt> stmts = parser.parse();
+        List<Stmt> stmts = parser.parse(lexer.lex(source));
 
         if (hadError) {
             return;

@@ -10,6 +10,7 @@ public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void> {
     private Environment globals = new Environment();
     private Environment environment = globals;
     private final Map<Expr, Integer> locals = new HashMap<>();
+    private final CommandDistributor commandDistributor = new CommandDistributor();
 
     Interpreter() {
         globals.define("clock", new Callable() {
@@ -28,7 +29,7 @@ public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void> {
     public void interpret(List<Stmt> statements) {
         try {
             for (Stmt statement : statements) {
-                execute(statement);
+                executeStatement(statement);
             }
         } catch (RuntimeError e) {
             Lang.runtimeError(e);
@@ -39,11 +40,11 @@ public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void> {
         locals.put(expr, depth);
     }
 
-    private Object evaluate(Expr expr) {
+    private Object evaluateExpression(Expr expr) {
         return expr.accept(this);
     }
 
-    private void execute(Stmt statement) {
+    private void executeStatement(Stmt statement) {
         statement.accept(this);
     }
 
@@ -52,7 +53,7 @@ public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void> {
         try {
             this.environment = environment;
             for (Stmt statement : statements) {
-                execute(statement);
+                executeStatement(statement);
             }
         } finally {
             this.environment = previous;
@@ -106,37 +107,37 @@ public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void> {
     }
 
     @Override
-    public Object visitExpr(Expr.Assign expression) {
-        Object value = evaluate(expression.expression);
-        Integer distance = locals.get(expression);
+    public Object visitExpr(Expr.Assign expr) {
+        Object value = evaluateExpression(expr.expression);
+        Integer distance = locals.get(expr);
         if (distance != null) {
-            environment.assignAt(distance, expression.token, value);
+            environment.assignAt(distance, expr.token, value);
         } else {
-            globals.assign(expression.token, value);
+            globals.assign(expr.token, value);
         }
         return null;
     }
 
     @Override
-    public Object visitExpr(Expr.Binary expression) {
-        Object left = evaluate(expression.expr_left);
-        Object right = evaluate(expression.expr_right);
+    public Object visitExpr(Expr.Binary expr) {
+        Object left = evaluateExpression(expr.expr_left);
+        Object right = evaluateExpression(expr.expr_right);
 
-        switch (expression.operator.type) {
+        switch (expr.operator.type) {
             case BRACKNQ_RIGHT: {
-                checkNumberOperands(expression.operator, left, right);
+                checkNumberOperands(expr.operator, left, right);
                 return (double)left > (double)right;
             }
             case BRACKNQ_LEFT: {
-                checkNumberOperands(expression.operator, left, right);
+                checkNumberOperands(expr.operator, left, right);
                 return (double)left < (double)right;
             }
             case GREATER_EQUALS: {
-                checkNumberOperands(expression.operator, left, right);
+                checkNumberOperands(expr.operator, left, right);
                 return (double)left >= (double)right;
             }
             case LESS_EQUALS: {
-                checkNumberOperands(expression.operator, left, right);
+                checkNumberOperands(expr.operator, left, right);
                 return (double)left <= (double)right;
             }
             case NOT_EQUALS: {
@@ -146,15 +147,15 @@ public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void> {
                 return isEqual(left, right);
             }
             case MINUS: {
-                checkNumberOperands(expression.operator, left, right);
+                checkNumberOperands(expr.operator, left, right);
                 return (double)left - (double)right;
             }
             case SLASH_FRWD: {
-                checkNumberOperands(expression.operator, left, right);
+                checkNumberOperands(expr.operator, left, right);
                 return (double)left / (double)right;
             }
             case ASTERISK: {
-                checkNumberOperands(expression.operator, left, right);
+                checkNumberOperands(expr.operator, left, right);
                 return (double)left * (double)right;
             }
             case PLUS: {
@@ -164,7 +165,7 @@ public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void> {
                 if (left instanceof String && right instanceof String) {
                     return (String) left + (String) right;
                 }
-                throw new RuntimeError(expression.operator, "Operands must be two numbers or two strings.");
+                throw new RuntimeError(expr.operator, "Operands must be two numbers or two strings.");
             }
         }
 
@@ -172,22 +173,22 @@ public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void> {
     }
 
     @Override
-    public Object visitExpr(Expr.Call expression) {
-        Object callee = evaluate(expression.callee);
+    public Object visitExpr(Expr.Call expr) {
+        Object callee = evaluateExpression(expr.callee);
 
         List<Object> arguments = new ArrayList<>();
-        for (Expr argument : expression.arguments) {
-            arguments.add(evaluate(argument));
+        for (Expr argument : expr.arguments) {
+            arguments.add(evaluateExpression(argument));
         }
 
         if (!(callee instanceof Callable)) {
-            throw new RuntimeError(expression.paren, "Can only call functions.");
+            throw new RuntimeError(expr.paren, "Can only call functions.");
         }
 
         Callable function = (Callable)callee;
 
         if (arguments.size() != function.arity()) {
-            throw new RuntimeError(expression.paren, "Expected " + function.arity() +
+            throw new RuntimeError(expr.paren, "Expected " + function.arity() +
                     " arguments but got " + arguments.size() + ".");
         }
 
@@ -195,19 +196,24 @@ public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void> {
     }
 
     @Override
-    public Object visitExpr(Expr.Grouping expression) {
-        return evaluate(expression);
+    public Object visitExpr(Expr.Command expr) {
+        return commandDistributor.carryOutCommand(expr.cmd);
     }
 
     @Override
-    public Object visitExpr(Expr.Literal expression) {
-        return expression.value;
+    public Object visitExpr(Expr.Grouping expr) {
+        return evaluateExpression(expr);
     }
 
     @Override
-    public Object visitExpr(Expr.Logical expression) {
-        Object left = evaluate(expression.left);
-        if (expression.operator.type == TokenType.OR) {
+    public Object visitExpr(Expr.Literal expr) {
+        return expr.value;
+    }
+
+    @Override
+    public Object visitExpr(Expr.Logical expr) {
+        Object left = evaluateExpression(expr.left);
+        if (expr.operator.type == TokenType.OR) {
             if (isTruthy(left)) {
                 return left;
             }
@@ -216,16 +222,16 @@ public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void> {
                 return left;
             }
         }
-        return evaluate(expression.right);
+        return evaluateExpression(expr.right);
     }
 
     @Override
-    public Object visitExpr(Expr.Unary expression) {
-        Object right = evaluate(expression.expression);
+    public Object visitExpr(Expr.Unary expr) {
+        Object right = evaluateExpression(expr.expression);
 
-        switch (expression.operator.type) {
+        switch (expr.operator.type) {
             case MINUS:
-                checkNumberOperand(expression.operator, right);
+                checkNumberOperand(expr.operator, right);
                 return -(double)right;
             case EXCLAMK:
                 return !isTruthy(right);
@@ -235,70 +241,76 @@ public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void> {
     }
 
     @Override
-    public Object visitExpr(Expr.Variable expression) {
-        return lookUpVariable(expression.token, expression);
+    public Object visitExpr(Expr.Variable expr) {
+        return lookUpVariable(expr.token, expr);
     }
 
     @Override
-    public Void visitStmt(Stmt.Block statement) {
-        executeBlock(statement.statements, new Environment(environment));
+    public Void visitStmt(Stmt.Block stmt) {
+        executeBlock(stmt.statements, new Environment(environment));
         return null;
     }
 
     @Override
-    public Void visitStmt(Stmt.Expression statement) {
-        evaluate(statement.expression);
+    public Void visitStmt(Stmt.Command stmt) {
+        commandDistributor.carryOutCommand(stmt.cmd);
         return null;
     }
 
     @Override
-    public Void visitStmt(Stmt.Function statement) {
-        Function function = new Function(statement, environment);
-        environment.define(statement.token.lexeme, function);
+    public Void visitStmt(Stmt.Expression stmt) {
+        evaluateExpression(stmt.expression);
         return null;
     }
 
     @Override
-    public Void visitStmt(Stmt.If statement) {
-        if (isTruthy(evaluate(statement.condition))) {
-            execute(statement.thenB);
-        } else if (statement.elseB != null) {
-            execute(statement.elseB);
+    public Void visitStmt(Stmt.Function stmt) {
+        Function function = new Function(stmt, environment);
+        environment.define(stmt.token.lexeme, function);
+        return null;
+    }
+
+    @Override
+    public Void visitStmt(Stmt.If stmt) {
+        if (isTruthy(evaluateExpression(stmt.condition))) {
+            executeStatement(stmt.thenB);
+        } else if (stmt.elseB != null) {
+            executeStatement(stmt.elseB);
         }
         return null;
     }
 
     @Override
-    public Void visitStmt(Stmt.Print statement) {
-        Object value = evaluate(statement.value);
+    public Void visitStmt(Stmt.Print stmt) {
+        Object value = evaluateExpression(stmt.value);
         System.out.println(stringify(value));
         return null;
     }
 
     @Override
-    public Void visitStmt(Stmt.Return statement) {
+    public Void visitStmt(Stmt.Return stmt) {
         Object value = null;
-        if (statement.value != null) {
-            value = evaluate(statement.value);
+        if (stmt.value != null) {
+            value = evaluateExpression(stmt.value);
         }
         throw new Return(value);
     }
 
     @Override
-    public Void visitStmt(Stmt.Variable statement) {
+    public Void visitStmt(Stmt.Variable stmt) {
         Object value = null;
-        if (statement.expression != null) {
-            value = evaluate(statement.expression);
+        if (stmt.expression != null) {
+            value = evaluateExpression(stmt.expression);
         }
 
-        environment.define(statement.token.lexeme, value);
+        environment.define(stmt.token.lexeme, value);
         return null;
     }
 
     @Override
-    public Void visitStmt(Stmt.While statement) {
-        while (isTruthy(evaluate(statement.condition))) {
-            execute(statement.body);
+    public Void visitStmt(Stmt.While stmt) {
+        while (isTruthy(evaluateExpression(stmt.condition))) {
+            executeStatement(stmt.body);
         }
         return null;
     }

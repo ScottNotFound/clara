@@ -31,6 +31,21 @@ abstract class Stmt {
     }
 
     /**
+     * Used when the statement is a command issued to the program.
+     */
+    static class Command extends Stmt {
+        Command(Cmd cmd) {
+            this.cmd = cmd;
+        }
+
+        <R> R accept(IStmtVisitor<R> visitor) {
+            return visitor.visitStmt(this);
+        }
+
+        final Cmd cmd;
+    }
+
+    /**
      * Used when the statement is just an expression.
      */
     static class Expression extends Stmt {
@@ -116,7 +131,7 @@ abstract class Stmt {
     }
 
     /**
-     * Used when the statement contains a variable declaration/definition.
+     * Used when the statement is a variable declaration/definition.
      */
     static class Variable extends Stmt {
         Variable(Token token, Expr expression) {

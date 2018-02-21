@@ -6,17 +6,37 @@ import java.util.List;
 
 public class Parser {
 
-    private final List<Token> tokenSequence;
+    private List<Token> tokenSequence;
     private int current = 0;
+    boolean commandMode;
 
-    Parser(List<Token> tokenSequence) {
+    Parser() {}
+
+    public static List<Stmt> staticParse(List<Token> tokenSequence) {
+        return staticParse(tokenSequence, false);
+    }
+
+    public static List<Stmt> staticParse(List<Token> tokenSequence, boolean commandMode) {
+        Parser parser = new Parser();
+        return parser.parse(tokenSequence, commandMode);
+    }
+
+    public List<Stmt> parse(List<Token> tokenSequence) {
+        return parse(tokenSequence, this.commandMode);
+    }
+
+    public List<Stmt> parse(List<Token> tokenSequence, boolean commandMode) {
         this.tokenSequence = tokenSequence;
+        this.commandMode = commandMode;
+        this.current = 0;
+
+        return parse();
     }
 
     /**
      * Parses the sequence of tokens contained by the Parser into a list of statements to execute.
      */
-    public List<Stmt> parse() {
+    private List<Stmt> parse() {
         try {
             List<Stmt> statements = new ArrayList<>();
             while (notEOF()) {
@@ -29,7 +49,17 @@ public class Parser {
 
     }
 
+    private Stmt statementDefault() {
+        if (matchToken(TokenType.SEMICOLON)) {
+            return new Stmt.Expression(new Expr.Literal(null));
+        }
+        return expressionStatement();
+    }
+
     private Stmt statement() {
+        if (matchToken(TokenType.COMMAND)) {
+            return commandStatement();
+        }
         if (matchToken(TokenType.FOR)) {
             return forStatement();
         }
@@ -48,7 +78,15 @@ public class Parser {
         if (matchToken(TokenType.BRACE_LEFT)) {
             return blockStatement();
         }
-        return expressionStatement();
+        return statementDefault();
+    }
+
+    private Stmt commandStatement() {
+        Cmd cmd = command();
+        if (!commandMode) {
+            requireToken(TokenType.SEMICOLON, "Expect ';' after value.");
+        }
+        return new Stmt.Command(cmd);
     }
 
     private Stmt forStatement() {
@@ -106,7 +144,12 @@ public class Parser {
 
     private Stmt printStatement() {
         Expr value = expression();
-        requireToken(TokenType.SEMICOLON, "Expect ';' after value.");
+        if (value == null) {
+            value = new Expr.Literal("");
+        }
+        if (!commandMode) {
+            requireToken(TokenType.SEMICOLON, "Expect ';' after value.");
+        }
         return new Stmt.Print(value);
     }
 
@@ -328,7 +371,7 @@ public class Parser {
      * Checks and parses the token. This has the highest priority so goes lowest in the tree.
      */
     private Expr primaryParseCheck() {
-        if (matchToken(TokenType.NUMBER, TokenType.STRING)) {
+        if (matchToken(TokenType.NUMBER, TokenType.STRING, TokenType.BOOLEAN)) {
             return new Expr.Literal(peekPrevious().literal);
         }
 
@@ -343,6 +386,21 @@ public class Parser {
         }
 
         return null;
+    }
+
+    /**
+     * Begins a series of checks to parse the command.
+     */
+    private Cmd command() {
+        Token commandToken = peekPrevious();
+
+        switch (commandToken.lexeme) {
+            case "help":
+                Token commandHelp = requireToken(TokenType.COMMAND, "no such command");
+                return new Cmd.Help();
+        }
+
+        return new Cmd.Help();
     }
 
     /**
