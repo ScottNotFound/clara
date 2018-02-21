@@ -388,6 +388,7 @@ public class Parser {
         return null;
     }
 
+
     /**
      * Begins a series of checks to parse the command.
      */
@@ -396,24 +397,48 @@ public class Parser {
 
         switch (commandToken.lexeme)
         {
-            case ("help") :
-            {
-                Token commandHelp = null;
-                if (notEOF() && !matchToken(TokenType.SEMICOLON)) {
-                    commandHelp = requireToken(TokenType.COMMAND, "no such command");
-                }
-                return new Cmd.Help(commandHelp);
-            }
-            case ("reaction") :
-            {
-
-            }
-            default:
-            {
-                return new Cmd.Help(null);
-            }
+            case ("help") :         return helpCommand();
+            case ("reaction") :     return reactionCommand();
+            default:                return commandDefault();
         }
     }
+
+    private Cmd commandDefault() {
+        return null;
+    }
+
+    private Cmd helpCommand() {
+        Token commandHelp = null;
+        if (notEOF() && !matchToken(TokenType.SEMICOLON)) {
+            commandHelp = requireToken(TokenType.COMMAND, "no such command");
+        }
+        return new Cmd.Help(commandHelp);
+    }
+
+    private Cmd reactionCommand() {
+        List<Opt> opts = new ArrayList<>();
+        while (notEOF() && !matchToken(TokenType.SEMICOLON)) {
+            if (matchToken(TokenType.MINUS)) {
+                if (matchToken(TokenType.MINUS)) {
+
+                } else {
+                    opts.add(new Opt.Flag(requireToken(TokenType.IDENTIFIER, "")));
+                }
+            }
+        }
+        return new Cmd.Reaction(opts);
+    }
+
+    private Opt assignOpt() {
+        List<Token> tokens = new ArrayList<>();
+        tokens.add(requireToken(TokenType.IDENTIFIER, ""));
+        while (matchToken(TokenType.MINUS)) {
+            tokens.add(requireToken(TokenType.IDENTIFIER, ""));
+        }
+        Token token = requireToken(TokenType.IDENTIFIER, "");
+        return Opt.Assign(null, null);
+    }
+
 
     /**
      * Requires the next token to be of the specified type. Throws an error if type does not match.

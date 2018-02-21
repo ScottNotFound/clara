@@ -18,7 +18,7 @@ abstract class Opt {
 
 
     /**
-     * Used when option is an argument that requires a parameter.
+     * Used when option is an argument for a parameter.
      */
     static class Argument extends Opt {
         Argument(Token token) {
@@ -31,6 +31,22 @@ abstract class Opt {
         }
 
         final Token token;
+    }
+
+    /**
+     * Used when there are multiple arguments for a parameter.
+     */
+    static class Arguments extends Opt {
+        Arguments(Token... tokens) {
+            this.tokens = Arrays.asList(tokens);
+        }
+
+        @Override
+        <R> R accept(IOptVisitor<R> visitor) {
+            return visitor.visitOpt(this);
+        }
+
+        final List<Token> tokens;
     }
 
     /**
@@ -68,26 +84,10 @@ abstract class Opt {
     }
 
     /**
-     * Used when option is a parameter for an argument.
+     * Used when option is a parameter that requires an argument or multiple arguments.
      */
     static class Parameter extends Opt {
-        Parameter(Token token) {
-            this.token = token;
-        }
-
-        @Override
-        <R> R accept(IOptVisitor<R> visitor) {
-            return visitor.visitOpt(this);
-        }
-
-        final Token token;
-    }
-
-    /**
-     * Used when option is a list of parameters for an argument
-     */
-    static class Parameters extends Opt {
-        Parameters(Token... tokens) {
+        Parameter(Token... tokens) {
             this.tokens = Arrays.asList(tokens);
         }
 

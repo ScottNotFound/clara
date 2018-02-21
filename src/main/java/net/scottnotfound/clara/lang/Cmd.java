@@ -1,5 +1,6 @@
 package net.scottnotfound.clara.lang;
 
+import java.util.List;
 
 /**
  * This class provides a representation for various commands that may be found.
@@ -35,8 +36,8 @@ abstract class Cmd {
      * Used when the command is a reaction command.
      */
     static class Reaction extends Cmd {
-        Reaction() {
-
+        Reaction(List<Opt> opts) {
+            this.opts = opts;
         }
 
         @Override
@@ -44,7 +45,7 @@ abstract class Cmd {
             return visitor.visitCmd(this);
         }
 
-
+        final List<Opt> opts;
     }
 
 
