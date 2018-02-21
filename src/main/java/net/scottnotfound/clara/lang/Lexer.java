@@ -88,6 +88,7 @@ public class Lexer {
             case ' ':               break;
             case '\r':              break;
             case '\t':              break;
+            case '\n':  line++;     break;
             case '"':   collectString();   break;
             case '(':   addToken(TokenType.PAREN_LEFT);     break;
             case ')':   addToken(TokenType.PAREN_RIGHT);    break;
@@ -113,7 +114,6 @@ public class Lexer {
             case '^':   addToken(TokenType.CARET);          break;
             case '&':   addToken(TokenType.AMPERSAND);      break;
             case '_':   addToken(TokenType.UNDERSCORE);     break;
-            case '\n':  addToken(TokenType.NEWLINE);        break;
             case '\'':  addToken(TokenType.QUOTEMK_S);      break;
             case '=':   addToken(matchChar('=') ? TokenType.DOUBLE_EQUALS : TokenType.EQUALS);          break;
             case '!':   addToken(matchChar('=') ? TokenType.NOT_EQUALS : TokenType.EXCLAMK);            break;
