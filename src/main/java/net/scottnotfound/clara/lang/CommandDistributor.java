@@ -1,6 +1,6 @@
 package net.scottnotfound.clara.lang;
 
-class CommandDistributor implements ICmdVisitor<Void> {
+class CommandDistributor implements ICmdVisitor<Void>, IOptVisitor<Void> {
 
     CommandDistributor() {
 
@@ -34,4 +34,36 @@ class CommandDistributor implements ICmdVisitor<Void> {
 
         return null;
     }
+
+    @Override
+    public Void visitCmd(Cmd.Reaction cmd) {
+        return null;
+    }
+
+    @Override
+    public Void visitOpt(Opt.Argument opt) {
+        return null;
+    }
+
+    @Override
+    public Void visitOpt(Opt.Assign opt) {
+        return null;
+    }
+
+    @Override
+    public Void visitOpt(Opt.Flag opt) {
+        return null;
+    }
+
+    @Override
+    public Void visitOpt(Opt.Parameter opt) {
+        return null;
+    }
+
+    @Override
+    public Void visitOpt(Opt.Parameters opt) {
+        return null;
+    }
+
+
 }

@@ -14,6 +14,7 @@ abstract class Cmd {
      */
     abstract <R> R accept(ICmdVisitor<R> visitor);
 
+
     /**
      * Used when the command is a help command.
      */
@@ -22,11 +23,29 @@ abstract class Cmd {
             this.command = command;
         }
 
+        @Override
         <R> R accept(ICmdVisitor<R> visitor) {
             return visitor.visitCmd(this);
         }
 
         final Token command;
     }
+
+    /**
+     * Used when the command is a reaction command.
+     */
+    static class Reaction extends Cmd {
+        Reaction() {
+
+        }
+
+        @Override
+        <R> R accept(ICmdVisitor<R> visitor) {
+            return visitor.visitCmd(this);
+        }
+
+
+    }
+
 
 }
