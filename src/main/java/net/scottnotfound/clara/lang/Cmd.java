@@ -18,15 +18,15 @@ abstract class Cmd {
      * Used when the command is a help command.
      */
     static class Help extends Cmd {
-        Help() {
-
+        Help(Token command) {
+            this.command = command;
         }
 
         <R> R accept(ICmdVisitor<R> visitor) {
             return visitor.visitCmd(this);
         }
 
-
+        final Token command;
     }
 
 }

@@ -394,13 +394,25 @@ public class Parser {
     private Cmd command() {
         Token commandToken = peekPrevious();
 
-        switch (commandToken.lexeme) {
-            case "help":
-                Token commandHelp = requireToken(TokenType.COMMAND, "no such command");
-                return new Cmd.Help();
-        }
+        switch (commandToken.lexeme)
+        {
+            case ("help") :
+            {
+                Token commandHelp = null;
+                if (notEOF() && !matchToken(TokenType.SEMICOLON)) {
+                    commandHelp = requireToken(TokenType.COMMAND, "no such command");
+                }
+                return new Cmd.Help(commandHelp);
+            }
+            case ("reaction") :
+            {
 
-        return new Cmd.Help();
+            }
+            default:
+            {
+                return new Cmd.Help(null);
+            }
+        }
     }
 
     /**

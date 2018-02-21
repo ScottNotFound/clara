@@ -13,6 +13,25 @@ class CommandDistributor implements ICmdVisitor<Void> {
 
     @Override
     public Void visitCmd(Cmd.Help cmd) {
+
+        if (cmd.command == null) {
+            // only "help" was entered
+            System.out.println("No commands available yet.");
+        } else {
+
+            switch (cmd.command.lexeme)
+            {
+
+
+                default:
+                {
+                    System.out.println("Command not yet implemented.");
+                }
+
+            }
+
+        }
+
         return null;
     }
 }
