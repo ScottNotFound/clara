@@ -404,6 +404,7 @@ public class Parser {
          */
         switch (commandToken.lexeme) {
             case ("help") :         return helpCommand();
+            case ("exit") :         return exitCommand();
             default:                return commandDefault(commandToken);
         }
     }
@@ -422,6 +423,10 @@ public class Parser {
             commandHelp = requireToken(TokenType.COMMAND, "no such command");
         }
         return new Cmd.Help(commandHelp);
+    }
+
+    private Cmd exitCommand() {
+        return new Cmd.Exit();
     }
 
 

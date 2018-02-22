@@ -52,6 +52,7 @@ public class Lexer {
         commands.add("open");
         commands.add("close");
         commands.add("command");
+        commands.add("exit");
 
     }
 

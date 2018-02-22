@@ -17,22 +17,6 @@ abstract class Cmd {
 
 
     /**
-     * Used when the command is a help command.
-     */
-    static class Help extends Cmd {
-        Help(Token command) {
-            this.command = command;
-        }
-
-        @Override
-        <R> R accept(ICmdVisitor<R> visitor) {
-            return visitor.visitCmd(this);
-        }
-
-        final Token command;
-    }
-
-    /**
      * Used when the command is a reaction command.
      */
     static class Default extends Cmd {
@@ -48,6 +32,35 @@ abstract class Cmd {
 
         final Token command;
         final List<Token> tokens;
+    }
+
+    /**
+     * Used when the command is the exit command.
+     */
+    static class Exit extends Cmd {
+        Exit() {
+
+        }
+
+        <R> R accept(ICmdVisitor<R> visitor) {
+            return visitor.visitCmd(this);
+        }
+    }
+
+    /**
+     * Used when the command is a help command.
+     */
+    static class Help extends Cmd {
+        Help(Token command) {
+            this.command = command;
+        }
+
+        @Override
+        <R> R accept(ICmdVisitor<R> visitor) {
+            return visitor.visitCmd(this);
+        }
+
+        final Token command;
     }
 
 
