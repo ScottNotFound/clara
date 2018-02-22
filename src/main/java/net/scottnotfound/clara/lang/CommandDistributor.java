@@ -19,12 +19,10 @@ class CommandDistributor implements ICmdVisitor<Void> {
             System.out.println("No commands available yet.");
         } else {
 
-            switch (cmd.command.lexeme)
-            {
+            switch (cmd.command.lexeme) {
 
 
-                default:
-                {
+                default: {
                     System.out.println("Command not yet implemented.");
                 }
 
@@ -37,6 +35,24 @@ class CommandDistributor implements ICmdVisitor<Void> {
 
     @Override
     public Void visitCmd(Cmd.Default cmd) {
+
+        if (cmd.command == null) {
+
+        } else {
+
+            switch (cmd.command.lexeme) {
+                case ("reaction") : {
+
+                }
+                default: {
+
+                }
+            }
+
+        }
+
+
+
         return null;
     }
 
