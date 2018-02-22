@@ -398,13 +398,16 @@ public class Parser {
         switch (commandToken.lexeme)
         {
             case ("help") :         return helpCommand();
-            case ("reaction") :     return reactionCommand();
-            default:                return commandDefault();
+            default:                return commandDefault(commandToken);
         }
     }
 
-    private Cmd commandDefault() {
-        return null;
+    private Cmd commandDefault(Token commandToken) {
+        List<Token> tokens = new ArrayList<>();
+        while (notEOF() && !matchToken(TokenType.SEMICOLON)) {
+            tokens.add(peekCurrent());
+        }
+        return new Cmd.Default(commandToken, tokens);
     }
 
     private Cmd helpCommand() {
@@ -413,30 +416,6 @@ public class Parser {
             commandHelp = requireToken(TokenType.COMMAND, "no such command");
         }
         return new Cmd.Help(commandHelp);
-    }
-
-    private Cmd reactionCommand() {
-        List<Opt> opts = new ArrayList<>();
-        while (notEOF() && !matchToken(TokenType.SEMICOLON)) {
-            if (matchToken(TokenType.MINUS)) {
-                if (matchToken(TokenType.MINUS)) {
-
-                } else {
-                    opts.add(new Opt.Flag(requireToken(TokenType.IDENTIFIER, "")));
-                }
-            }
-        }
-        return new Cmd.Reaction(opts);
-    }
-
-    private Opt assignOpt() {
-        List<Token> tokens = new ArrayList<>();
-        tokens.add(requireToken(TokenType.IDENTIFIER, ""));
-        while (matchToken(TokenType.MINUS)) {
-            tokens.add(requireToken(TokenType.IDENTIFIER, ""));
-        }
-        Token token = requireToken(TokenType.IDENTIFIER, "");
-        return Opt.Assign(null, null);
     }
 
 

@@ -4,6 +4,6 @@ interface ICmdVisitor<R> {
 
     R visitCmd(Cmd.Help cmd);
 
-    R visitCmd(Cmd.Reaction cmd);
+    R visitCmd(Cmd.Default cmd);
 
 }

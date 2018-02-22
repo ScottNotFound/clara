@@ -35,9 +35,10 @@ abstract class Cmd {
     /**
      * Used when the command is a reaction command.
      */
-    static class Reaction extends Cmd {
-        Reaction(List<Opt> opts) {
-            this.opts = opts;
+    static class Default extends Cmd {
+        Default(Token command, List<Token> tokens) {
+            this.command = command;
+            this.tokens = tokens;
         }
 
         @Override
@@ -45,7 +46,8 @@ abstract class Cmd {
             return visitor.visitCmd(this);
         }
 
-        final List<Opt> opts;
+        final Token command;
+        final List<Token> tokens;
     }
 
 
