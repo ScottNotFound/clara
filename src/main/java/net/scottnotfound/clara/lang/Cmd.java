@@ -20,9 +20,9 @@ abstract class Cmd {
      * Used when the command is a reaction command.
      */
     static class Default extends Cmd {
-        Default(Token command, List<Token> tokens) {
+        Default(Token command, List<Arg> args) {
             this.command = command;
-            this.tokens = tokens;
+            this.args = args;
         }
 
         @Override
@@ -31,7 +31,7 @@ abstract class Cmd {
         }
 
         final Token command;
-        final List<Token> tokens;
+        final List<Arg> args;
     }
 
     /**

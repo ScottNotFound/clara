@@ -210,7 +210,7 @@ public class Parser {
         if (!checkCurrentToken(TokenType.PAREN_RIGHT)) {
             do {
                 if (parameters.size() >= 8) {
-
+                    /**/
                 }
                 parameters.add(requireToken(TokenType.IDENTIFIER, "Expect parameter name."));
             } while (matchToken(TokenType.COMMA));
@@ -358,7 +358,7 @@ public class Parser {
         if (!checkCurrentToken(TokenType.PAREN_RIGHT)) {
             do {
                 if (arguments.size() >= 8) {
-
+                    /**/
                 }
                 arguments.add(expression());
             } while (matchToken(TokenType.COMMA));
@@ -410,11 +410,7 @@ public class Parser {
     }
 
     private Cmd commandDefault(Token commandToken) {
-        List<Token> tokens = new ArrayList<>();
-        while (notEOF() && !matchToken(TokenType.SEMICOLON)) {
-            tokens.add(peekCurrent());
-        }
-        return new Cmd.Default(commandToken, tokens);
+        return collectCommandArgs();
     }
 
     private Cmd helpCommand() {
@@ -427,6 +423,37 @@ public class Parser {
 
     private Cmd exitCommand() {
         return new Cmd.Exit();
+    }
+
+    private Cmd collectCommandArgs() {
+        Token commandToken = peekPrevious();
+        List<Arg> args = new ArrayList<>();
+        while (notEOF() && !matchToken(TokenType.SEMICOLON)) {
+            if (matchToken(TokenType.MINUS)) {
+                if (matchToken(TokenType.MINUS)) {
+                    args.add(collectParameterArguments());
+                } else {
+                    args.add(collectFlag());
+                }
+            }
+        }
+
+        return new Cmd.Default(commandToken, args);
+    }
+
+    private Arg.Parameter collectParameterArguments() {
+        List<Arg.Argument> arguments = new ArrayList<>();
+        String parameter = requireToken(TokenType.IDENTIFIER, "parameter must be an identifier").lexeme;
+        while (notEOF() && !matchToken(TokenType.SEMICOLON)) {
+            while (matchToken(TokenType.COMMA))/**/;
+            String arg = requireToken(TokenType.IDENTIFIER, "argument must be an identifier").lexeme;
+            arguments.add(new Arg.Argument(arg));
+        }
+        return new Arg.Parameter(parameter, arguments);
+    }
+
+    private Arg.Flag collectFlag() {
+        return new Arg.Flag(requireToken(TokenType.IDENTIFIER, "flag must be an identifier").lexeme);
     }
 
 
