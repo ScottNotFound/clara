@@ -524,6 +524,15 @@ public class Parser {
         return false;
     }
 
+    private boolean checkToken(TokenType... tokenTypes) {
+        for (TokenType tokenType : tokenTypes) {
+            if (checkCurrentToken(tokenType)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private boolean checkCurrentToken(TokenType tokenType) {
         return notEOF() && peekCurrent().type == tokenType;
     }
