@@ -45,10 +45,8 @@ public class Lexer {
         commands.add("finish");
         commands.add("begin");
         commands.add("react");
-        commands.add("reactant");
         commands.add("reaction");
         commands.add("scheme");
-        commands.add("product");
         commands.add("open");
         commands.add("close");
         commands.add("command");
