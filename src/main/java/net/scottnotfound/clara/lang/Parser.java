@@ -442,14 +442,14 @@ public class Parser {
     }
 
     private Arg.Parameter collectParameterArguments() {
-        List<Arg.Argument> arguments = new ArrayList<>();
         String parameter = requireToken(TokenType.IDENTIFIER, "parameter must be an identifier").lexeme;
+        List<Arg.Argument> arguments = new ArrayList<>();
         while (notEOF() && !matchToken(TokenType.SEMICOLON)) {
             while (matchToken(TokenType.COMMA))/**/;
             if (checkCurrentToken(TokenType.MINUS)) {
                 return new Arg.Parameter(parameter, arguments);
             }
-            String arg = requireToken(TokenType.IDENTIFIER, "argument must be an identifier").lexeme;
+            String arg = requireToken(TokenType.STRING, "argument must be a string").lexeme;
             arguments.add(new Arg.Argument(arg));
         }
         return new Arg.Parameter(parameter, arguments);
