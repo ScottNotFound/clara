@@ -7,8 +7,8 @@ abstract class Arg {
     abstract <R> R accept(IArgVisitor<R> visitor);
 
     static class Argument extends Arg {
-        Argument(String argument) {
-            this.argument = argument;
+        Argument(Expr expr) {
+            this.expr = expr;
         }
 
         @Override
@@ -16,7 +16,7 @@ abstract class Arg {
             return visitor.visitArg(this);
         }
 
-        final String argument;
+        final Expr expr;
     }
 
     static class Flag extends Arg {

@@ -415,9 +415,11 @@ public class Parser {
 
     private Cmd helpCommand() {
         Token commandHelp = null;
+
         if (notEOF() && !matchToken(TokenType.SEMICOLON)) {
             commandHelp = requireToken(TokenType.COMMAND, "no such command");
         }
+
         return new Cmd.Help(commandHelp);
     }
 
@@ -425,36 +427,58 @@ public class Parser {
         return new Cmd.Exit();
     }
 
+    /**
+     * Collects arguments passed to the command. A single minus denotes flags, double minus denotes a parameter
+     * with additional arguments.
+     * May pass expressions as arguments (must be grouped with parenthesis if containing more than one token).
+     */
     private Cmd collectCommandArgs() {
         Token commandToken = peekPrevious();
         List<Arg> args = new ArrayList<>();
+
         while (notEOF() && !matchToken(TokenType.SEMICOLON)) {
+
             if (matchToken(TokenType.MINUS)) {
                 if (matchToken(TokenType.MINUS)) {
                     args.add(collectParameterArguments());
                 } else {
                     args.add(collectFlag());
                 }
+            } else {
+                args.add(new Arg.Argument(primaryParseCheck()));
             }
+
         }
 
         return new Cmd.Default(commandToken, args);
     }
 
+    /**
+     * Collects a parameter and a list of arguments for that parameter. Stops collecting arguments for parameter
+     * when a '-', ';', or EOF is encountered.
+     */
     private Arg.Parameter collectParameterArguments() {
         String parameter = requireToken(TokenType.IDENTIFIER, "parameter must be an identifier").lexeme;
         List<Arg.Argument> arguments = new ArrayList<>();
+
         while (notEOF() && !matchToken(TokenType.SEMICOLON)) {
+
             while (matchToken(TokenType.COMMA))/**/;
+
             if (checkCurrentToken(TokenType.MINUS)) {
                 return new Arg.Parameter(parameter, arguments);
             }
-            String arg = requireToken(TokenType.STRING, "argument must be a string").lexeme;
-            arguments.add(new Arg.Argument(arg));
+
+            arguments.add(new Arg.Argument(primaryParseCheck()));
+
         }
+
         return new Arg.Parameter(parameter, arguments);
     }
 
+    /**
+     * Collects flags passed to the command. Identifier type token due to structure. Only string portion is used.
+     */
     private Arg.Flag collectFlag() {
         return new Arg.Flag(requireToken(TokenType.IDENTIFIER, "flag must be an identifier").lexeme);
     }
