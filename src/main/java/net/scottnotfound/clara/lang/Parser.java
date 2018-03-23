@@ -397,10 +397,7 @@ public class Parser {
 
         /*
          * This is to be used for special cases for certain commands. Special cases will
-         * be parsed here in the parser while anything else will just have the token stream
-         * passed in and parsed later. This is so that the parsing of the command parameters
-         * doesn't clutter up the main parser and the command can be parsed according to the
-         * grammar specific to that command.
+         * be parsed separately while others will be parsed according to default rules.
          */
         switch (commandToken.lexeme) {
             case ("help") :         return helpCommand();
