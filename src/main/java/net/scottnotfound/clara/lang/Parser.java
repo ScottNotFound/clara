@@ -458,7 +458,7 @@ public class Parser {
         String parameter = requireToken(TokenType.IDENTIFIER, "parameter must be an identifier").lexeme;
         List<Arg.Argument> arguments = new ArrayList<>();
 
-        while (!checkCurrentToken(TokenType.SEMICOLON, TokenType.MINUS)) {
+        while (notEOF() && !checkCurrentToken(TokenType.SEMICOLON, TokenType.MINUS)) {
 
             while (matchToken(TokenType.COMMA))/**/;
 
