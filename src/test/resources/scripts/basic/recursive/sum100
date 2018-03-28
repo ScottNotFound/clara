@@ -12,5 +12,7 @@ print "result should be 5050";
 print sum;
 if (sum == 5050) {
     print "success";
+} else {
+    print "failure";
 }
 }
