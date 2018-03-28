@@ -458,13 +458,9 @@ public class Parser {
         String parameter = requireToken(TokenType.IDENTIFIER, "parameter must be an identifier").lexeme;
         List<Arg.Argument> arguments = new ArrayList<>();
 
-        while (notEOF() && !matchToken(TokenType.SEMICOLON)) {
+        while (notEOF() && !checkCurrentToken(TokenType.SEMICOLON, TokenType.MINUS)) {
 
             while (matchToken(TokenType.COMMA))/**/;
-
-            if (checkCurrentToken(TokenType.MINUS)) {
-                return new Arg.Parameter(parameter, arguments);
-            }
 
             arguments.add(new Arg.Argument(primaryParseCheck()));
 
@@ -545,7 +541,7 @@ public class Parser {
         return false;
     }
 
-    private boolean checkToken(TokenType... tokenTypes) {
+    private boolean checkCurrentToken(TokenType... tokenTypes) {
         for (TokenType tokenType : tokenTypes) {
             if (checkCurrentToken(tokenType)) {
                 return true;
