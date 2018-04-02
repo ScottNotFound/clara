@@ -1,18 +1,12 @@
 package net.scottnotfound.clara.lang;
 
-class CommandDistributor implements ICmdVisitor<Void> {
+class CommandDistributor {
 
     CommandDistributor() {
 
     }
 
     Object carryOutCommand(Cmd command) {
-        command.accept(this);
-        return null;
-    }
-
-    @Override
-    public Void visitCmd(Cmd.Help cmd) {
         return null;
     }
 }

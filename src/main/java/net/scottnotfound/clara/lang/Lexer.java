@@ -45,13 +45,12 @@ public class Lexer {
         commands.add("finish");
         commands.add("begin");
         commands.add("react");
-        commands.add("reactant");
         commands.add("reaction");
         commands.add("scheme");
-        commands.add("product");
         commands.add("open");
         commands.add("close");
         commands.add("command");
+        commands.add("exit");
 
     }
 
@@ -88,6 +87,7 @@ public class Lexer {
             case ' ':               break;
             case '\r':              break;
             case '\t':              break;
+            case '\n':  line++;     break;
             case '"':   collectString();   break;
             case '(':   addToken(TokenType.PAREN_LEFT);     break;
             case ')':   addToken(TokenType.PAREN_RIGHT);    break;
@@ -113,7 +113,6 @@ public class Lexer {
             case '^':   addToken(TokenType.CARET);          break;
             case '&':   addToken(TokenType.AMPERSAND);      break;
             case '_':   addToken(TokenType.UNDERSCORE);     break;
-            case '\n':  addToken(TokenType.NEWLINE);        break;
             case '\'':  addToken(TokenType.QUOTEMK_S);      break;
             case '=':   addToken(matchChar('=') ? TokenType.DOUBLE_EQUALS : TokenType.EQUALS);          break;
             case '!':   addToken(matchChar('=') ? TokenType.NOT_EQUALS : TokenType.EXCLAMK);            break;
@@ -183,14 +182,16 @@ public class Lexer {
         if (peekCurrent() == '.' && isDigit(peekNext())) {
             advanceChar();
 
-            while (isDigit(peekCurrent())) advanceChar();
+            while (isDigit(peekCurrent())) {
+                advanceChar();
+            }
         }
 
         addToken(TokenType.NUMBER, Double.parseDouble(sourceSequence.substring(start, current)));
     }
 
     private void collectOther() {
-        while (isAlphaNumeric(peekCurrent())) {
+        while (isAlphaNumeric(peekCurrent()) || peekCurrent() == '_') {
             current++;
         }
 
@@ -259,6 +260,18 @@ public class Lexer {
         } else {
             return sourceSequence.charAt(current + 1);
         }
+    }
+
+    private boolean matchChars(char... chars) {
+        if (isAtEnd()) {
+            return false;
+        }
+        for (char c : chars) {
+            if (sourceSequence.charAt(current) == c) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean isDigit(char c) {

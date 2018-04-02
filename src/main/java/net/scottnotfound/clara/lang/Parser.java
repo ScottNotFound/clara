@@ -210,7 +210,7 @@ public class Parser {
         if (!checkCurrentToken(TokenType.PAREN_RIGHT)) {
             do {
                 if (parameters.size() >= 8) {
-
+                    /**/
                 }
                 parameters.add(requireToken(TokenType.IDENTIFIER, "Expect parameter name."));
             } while (matchToken(TokenType.COMMA));
@@ -358,7 +358,7 @@ public class Parser {
         if (!checkCurrentToken(TokenType.PAREN_RIGHT)) {
             do {
                 if (arguments.size() >= 8) {
-
+                    /**/
                 }
                 arguments.add(expression());
             } while (matchToken(TokenType.COMMA));
@@ -388,20 +388,94 @@ public class Parser {
         return null;
     }
 
+
     /**
      * Begins a series of checks to parse the command.
      */
     private Cmd command() {
         Token commandToken = peekPrevious();
 
+        /*
+         * This is to be used for special cases for certain commands. Special cases will
+         * be parsed separately while others will be parsed according to default rules.
+         */
         switch (commandToken.lexeme) {
-            case "help":
-                Token commandHelp = requireToken(TokenType.COMMAND, "no such command");
-                return new Cmd.Help();
+            case ("help") :         return helpCommand();
+            case ("exit") :         return exitCommand();
+            default:                return commandDefault(commandToken);
+        }
+    }
+
+    private Cmd commandDefault(Token commandToken) {
+        return collectCommandArgs();
+    }
+
+    private Cmd helpCommand() {
+        Token commandHelp = null;
+
+        if (notEOF() && !matchToken(TokenType.SEMICOLON)) {
+            commandHelp = requireToken(TokenType.COMMAND, "no such command");
         }
 
-        return new Cmd.Help();
+        return new Cmd.Help(commandHelp);
     }
+
+    private Cmd exitCommand() {
+        return new Cmd.Exit();
+    }
+
+    /**
+     * Collects arguments passed to the command. A single minus denotes flags, double minus denotes a parameter
+     * with additional arguments.
+     * May pass expressions as arguments (must be grouped with parenthesis if containing more than one token).
+     */
+    private Cmd collectCommandArgs() {
+        Token commandToken = peekPrevious();
+        List<Arg> args = new ArrayList<>();
+
+        while (notEOF() && !matchToken(TokenType.SEMICOLON)) {
+
+            if (matchToken(TokenType.MINUS)) {
+                if (matchToken(TokenType.MINUS)) {
+                    args.add(collectParameterArguments());
+                } else {
+                    args.add(collectFlag());
+                }
+            } else {
+                args.add(new Arg.Argument(primaryParseCheck()));
+            }
+
+        }
+
+        return new Cmd.Default(commandToken, args);
+    }
+
+    /**
+     * Collects a parameter and a list of arguments for that parameter. Stops collecting arguments for parameter
+     * when a '-', ';', or EOF is encountered.
+     */
+    private Arg.Parameter collectParameterArguments() {
+        String parameter = requireToken(TokenType.IDENTIFIER, "parameter must be an identifier").lexeme;
+        List<Arg.Argument> arguments = new ArrayList<>();
+
+        while (notEOF() && !checkCurrentToken(TokenType.SEMICOLON, TokenType.MINUS)) {
+
+            while (matchToken(TokenType.COMMA))/**/;
+
+            arguments.add(new Arg.Argument(primaryParseCheck()));
+
+        }
+
+        return new Arg.Parameter(parameter, arguments);
+    }
+
+    /**
+     * Collects flags passed to the command. Identifier type token due to structure. Only string portion is used.
+     */
+    private Arg.Flag collectFlag() {
+        return new Arg.Flag(requireToken(TokenType.IDENTIFIER, "flag must be an identifier").lexeme);
+    }
+
 
     /**
      * Requires the next token to be of the specified type. Throws an error if type does not match.
@@ -464,6 +538,15 @@ public class Parser {
             }
         }
 
+        return false;
+    }
+
+    private boolean checkCurrentToken(TokenType... tokenTypes) {
+        for (TokenType tokenType : tokenTypes) {
+            if (checkCurrentToken(tokenType)) {
+                return true;
+            }
+        }
         return false;
     }
 

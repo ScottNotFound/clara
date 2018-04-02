@@ -25,6 +25,7 @@ abstract class Expr {
             this.expression = expression;
         }
 
+        @Override
         <R> R accept(IExprVisitor<R> visitor) {
             return visitor.visitExpr(this);
         }
@@ -43,6 +44,7 @@ abstract class Expr {
             this.operator = operator;
         }
 
+        @Override
         <R> R accept(IExprVisitor<R> visitor) {
             return visitor.visitExpr(this);
         }
@@ -62,6 +64,7 @@ abstract class Expr {
             this.arguments = arguments;
         }
 
+        @Override
         <R> R accept(IExprVisitor<R> visitor) {
             return visitor.visitExpr(this);
         }
@@ -79,6 +82,7 @@ abstract class Expr {
             this.cmd = cmd;
         }
 
+        @Override
         <R> R accept(IExprVisitor<R> visitor) {
             return visitor.visitExpr(this);
         }
@@ -94,6 +98,7 @@ abstract class Expr {
             this.expression = expression;
         }
 
+        @Override
         <R> R accept(IExprVisitor<R> visitor) {
             return visitor.visitExpr(this);
         }
@@ -109,6 +114,7 @@ abstract class Expr {
             this.value = value;
         }
 
+        @Override
         <R> R accept(IExprVisitor<R> visitor) {
             return visitor.visitExpr(this);
         }
@@ -126,6 +132,7 @@ abstract class Expr {
             this.right = right;
         }
 
+        @Override
         <R> R accept(IExprVisitor<R> visitor) {
             return visitor.visitExpr(this);
         }
@@ -144,6 +151,7 @@ abstract class Expr {
             this.operator = operator;
         }
 
+        @Override
         <R> R accept(IExprVisitor<R> visitor) {
             return visitor.visitExpr(this);
         }
@@ -160,6 +168,7 @@ abstract class Expr {
             this.token = token;
         }
 
+        @Override
         <R> R accept(IExprVisitor<R> visitor) {
             return visitor.visitExpr(this);
         }

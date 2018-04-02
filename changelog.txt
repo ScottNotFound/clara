@@ -1,7 +1,0 @@
-
-
-0.0.003-SNAPSHOT
--pretty much a functional scripting language now
-
-0.0.002-SNAPSHOT
--introduced expressions

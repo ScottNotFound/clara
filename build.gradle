@@ -2,11 +2,14 @@ group 'net.scottnotfound'
 
 apply plugin: 'java'
 apply plugin: 'idea'
+apply plugin: 'jacoco'
 
 sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
+    mavenLocal()
+    jcenter()
 }
 
 dependencies {
@@ -22,6 +25,13 @@ dependencies {
     compile 'org.apache.chemistry.opencmis:chemistry-opencmis-commons-impl:1.1.0'
     compile 'uk.ac.cam.ch.opsin:opsin-core:2.3.1'
     compile 'org.openscience.cdk:cdk-bundle:2.1.1'
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        html.enabled false
+    }
 }
 
 
