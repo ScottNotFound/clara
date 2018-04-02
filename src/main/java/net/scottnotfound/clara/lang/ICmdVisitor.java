@@ -17,4 +17,9 @@ interface ICmdVisitor<R> {
      */
     R visitCmd(Cmd.Help cmd);
 
+    /**
+     * Used when the command is the reaction command.
+     */
+    R visitCmd(Cmd.Reaction cmd);
+
 }

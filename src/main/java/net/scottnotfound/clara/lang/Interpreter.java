@@ -380,4 +380,9 @@ public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void>, IA
         }
         return null;
     }
+
+    @Override
+    public Void visitCmd(Cmd.Reaction cmd) {
+        return null;
+    }
 }

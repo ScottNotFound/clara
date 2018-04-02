@@ -402,8 +402,25 @@ public class Parser {
         switch (commandToken.lexeme) {
             case ("help") :         return helpCommand();
             case ("exit") :         return exitCommand();
+            case ("reaction") :     return reactionCommand();
             default:                return commandDefault(commandToken);
         }
+    }
+
+    private Cmd reactionCommand() {
+        Arg.Flag flag = null;
+        if (matchToken(TokenType.MINUS)) {
+            if (matchToken(TokenType.MINUS)) {
+                throw error(peekCurrent(), "flag expected");
+            } else {
+                flag = collectFlag();
+            }
+        }
+        List<Arg.Argument> arguments = new ArrayList<>();
+        while (notEOF() && !matchToken(TokenType.SEMICOLON)) {
+            arguments.add(new Arg.Argument(primaryParseCheck()));
+        }
+        return new Cmd.Reaction(flag, arguments);
     }
 
     private Cmd commandDefault(Token commandToken) {
