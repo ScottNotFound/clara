@@ -31,16 +31,16 @@ public class ReactionBuilder {
 
     public IReaction build(List<String> reactants) {
 
-        List<String> similes = new ArrayList<>();
+        List<String> smiles = new ArrayList<>();
         for (String reactant : reactants) {
-            String simile = NTS_INSTANCE.parseToSmiles(reactant);
-            similes.add(simile);
+            String smile = NTS_INSTANCE.parseToSmiles(reactant);
+            smiles.add(smile);
         }
 
         List<IAtomContainer> atomContainerList = new ArrayList<>();
-        for (String simile : similes) {
+        for (String smile : smiles) {
             try {
-                IAtomContainer atomContainer = SP_INSTANCE.parseSmiles(simile);
+                IAtomContainer atomContainer = SP_INSTANCE.parseSmiles(smile);
                 atomContainerList.add(atomContainer);
             } catch (Exception e) {
                 System.err.println(e.getMessage());
