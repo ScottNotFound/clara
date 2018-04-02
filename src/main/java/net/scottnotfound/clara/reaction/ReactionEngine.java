@@ -1,11 +1,13 @@
 package net.scottnotfound.clara.reaction;
 
-public class ReactionEngine {
+import org.openscience.cdk.interfaces.IReaction;
+
+class ReactionEngine {
 
     private static ReactionEngine RE_INSTANCE;
-    private static ReactionBuilder RB_INSTANCE;
 
-    public static ReactionEngine getInstance() {
+
+    static ReactionEngine getInstance() {
         if (RE_INSTANCE == null) {
             RE_INSTANCE = new ReactionEngine();
         }
@@ -13,9 +15,12 @@ public class ReactionEngine {
     }
 
     private ReactionEngine() {
-        RB_INSTANCE = ReactionBuilder.getInstance();
+
     }
 
+    IReaction solveReaction(IReaction unsolvedReaction) {
 
+        return null;
+    }
 
 }
