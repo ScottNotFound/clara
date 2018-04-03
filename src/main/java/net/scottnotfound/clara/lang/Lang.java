@@ -61,7 +61,7 @@ public class Lang {
         }
 
         Resolver resolver = new Resolver(interpreter);
-        resolver.resolve(stmts);
+        resolver.resolveStmts(stmts);
 
         if (hadError) {
             return;
