@@ -23,11 +23,28 @@ abstract class Stmt {
             this.statements = statements;
         }
 
+        @Override
         <R> R accept(IStmtVisitor<R> visitor) {
             return visitor.visitStmt(this);
         }
 
         final List<Stmt> statements;
+    }
+
+    /**
+     * Used when the statement is a command issued to the program.
+     */
+    static class Command extends Stmt {
+        Command(Cmd cmd) {
+            this.cmd = cmd;
+        }
+
+        @Override
+        <R> R accept(IStmtVisitor<R> visitor) {
+            return visitor.visitStmt(this);
+        }
+
+        final Cmd cmd;
     }
 
     /**
@@ -38,6 +55,7 @@ abstract class Stmt {
             this.expression = expression;
         }
 
+        @Override
         <R> R accept(IStmtVisitor<R> visitor) {
             return visitor.visitStmt(this);
         }
@@ -55,6 +73,7 @@ abstract class Stmt {
             this.body = body;
         }
 
+        @Override
         <R> R accept(IStmtVisitor<R> visitor) {
             return visitor.visitStmt(this);
         }
@@ -74,6 +93,7 @@ abstract class Stmt {
             this.elseB = elseB;
         }
 
+        @Override
         <R> R accept(IStmtVisitor<R> visitor) {
             return visitor.visitStmt(this);
         }
@@ -91,6 +111,7 @@ abstract class Stmt {
             this.value = value;
         }
 
+        @Override
         <R> R accept(IStmtVisitor<R> visitor) {
             return visitor.visitStmt(this);
         }
@@ -107,6 +128,7 @@ abstract class Stmt {
             this.value = value;
         }
 
+        @Override
         <R> R accept(IStmtVisitor<R> visitor) {
             return visitor.visitStmt(this);
         }
@@ -116,7 +138,7 @@ abstract class Stmt {
     }
 
     /**
-     * Used when the statement contains a variable declaration/definition.
+     * Used when the statement is a variable declaration/definition.
      */
     static class Variable extends Stmt {
         Variable(Token token, Expr expression) {
@@ -124,6 +146,7 @@ abstract class Stmt {
             this.expression = expression;
         }
 
+        @Override
         <R> R accept(IStmtVisitor<R> visitor) {
             return visitor.visitStmt(this);
         }
@@ -141,6 +164,7 @@ abstract class Stmt {
             this.body = body;
         }
 
+        @Override
         <R> R accept(IStmtVisitor<R> visitor) {
             return visitor.visitStmt(this);
         }
@@ -148,4 +172,6 @@ abstract class Stmt {
         final Expr condition;
         final Stmt body;
     }
+
+
 }

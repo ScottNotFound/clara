@@ -1,23 +1,22 @@
 package net.scottnotfound.clara.lang;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Lexer {
 
-    private final String sourceSequence;
-    private final List<Token> tokenSequence = new ArrayList<>();
+    private String sourceSequence;
+    private List<Token> tokenSequence = new ArrayList<>();
     private int start = 0;
     private int current = 0;
     private int line = 1;
 
     private static final Map<String, TokenType> keywords;
+    private static final Set<String> commands;
 
     static {
         keywords = new HashMap<>();
-        keywords.put("print", TokenType.PRINT);
+
+        // base keywords
         keywords.put("var", TokenType.VAR);
         keywords.put("let", TokenType.VAR);
         keywords.put("if", TokenType.IF);
@@ -30,14 +29,49 @@ public class Lexer {
         keywords.put("return", TokenType.RETURN);
         keywords.put("for", TokenType.FOR);
 
+        // built in operations
+        keywords.put("print", TokenType.PRINT);
+        keywords.put("echo", TokenType.PRINT);
+
+
+
+        // commands
+        commands = new HashSet<>();
+
+        commands.add("help");
+        commands.add("create");
+        commands.add("start");
+        commands.add("end");
+        commands.add("finish");
+        commands.add("begin");
+        commands.add("react");
+        commands.add("reaction");
+        commands.add("scheme");
+        commands.add("open");
+        commands.add("close");
+        commands.add("command");
+        commands.add("exit");
+
     }
 
 
-    Lexer(String sourceSequence) {
-        this.sourceSequence = sourceSequence;
+    Lexer() {}
+
+    public static List<Token> staticLex(String source) {
+        Lexer lexer = new Lexer();
+        return lexer.lex(source);
     }
 
-    public List<Token> lex() {
+    public List<Token> lex(String source) {
+        this.sourceSequence = source;
+        this.tokenSequence = new ArrayList<>();
+        this.line = 1;
+        this.start = 0;
+        this.current = 0;
+        return lex();
+    }
+
+    private List<Token> lex() {
         while (!isAtEnd()) {
             start = current;
             lexToken();
@@ -112,7 +146,7 @@ public class Lexer {
                 if (isDigit(c)) {
                     collectNumber();
                 } else if (isAlpha(c)) {
-                    collectIdentifier();
+                    collectOther();
                 } else {
                     Lang.error(line, "Unexpected character.");
                 }
@@ -148,25 +182,44 @@ public class Lexer {
         if (peekCurrent() == '.' && isDigit(peekNext())) {
             advanceChar();
 
-            while (isDigit(peekCurrent())) advanceChar();
+            while (isDigit(peekCurrent())) {
+                advanceChar();
+            }
         }
 
         addToken(TokenType.NUMBER, Double.parseDouble(sourceSequence.substring(start, current)));
     }
 
-    private void collectIdentifier() {
-        while (isAlphaNumeric(peekCurrent())) {
-            advanceChar();
+    private void collectOther() {
+        while (isAlphaNumeric(peekCurrent()) || peekCurrent() == '_') {
+            current++;
         }
 
         String text = sourceSequence.substring(start, current);
 
+        // collect identifier
         TokenType type = keywords.get(text.toLowerCase());
         if (type == null) {
             type = TokenType.IDENTIFIER;
         }
 
-        addToken(type);
+        // collect command
+        if (commands.contains(text.toLowerCase())) {
+            type = TokenType.COMMAND;
+        }
+
+        // collect boolean literal
+        switch (text) {
+            case "true":
+                addToken(TokenType.BOOLEAN, true);
+                break;
+            case "false":
+                addToken(TokenType.BOOLEAN, false);
+                break;
+            default:
+                addToken(type);
+                break;
+        }
     }
 
     private boolean matchChar(char expected) {
@@ -207,6 +260,18 @@ public class Lexer {
         } else {
             return sourceSequence.charAt(current + 1);
         }
+    }
+
+    private boolean matchChars(char... chars) {
+        if (isAtEnd()) {
+            return false;
+        }
+        for (char c : chars) {
+            if (sourceSequence.charAt(current) == c) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean isDigit(char c) {

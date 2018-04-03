@@ -25,6 +25,7 @@ abstract class Expr {
             this.expression = expression;
         }
 
+        @Override
         <R> R accept(IExprVisitor<R> visitor) {
             return visitor.visitExpr(this);
         }
@@ -43,6 +44,7 @@ abstract class Expr {
             this.operator = operator;
         }
 
+        @Override
         <R> R accept(IExprVisitor<R> visitor) {
             return visitor.visitExpr(this);
         }
@@ -62,6 +64,7 @@ abstract class Expr {
             this.arguments = arguments;
         }
 
+        @Override
         <R> R accept(IExprVisitor<R> visitor) {
             return visitor.visitExpr(this);
         }
@@ -72,6 +75,22 @@ abstract class Expr {
     }
 
     /**
+     * Used when the expression is a command issued to the program.
+     */
+    static class Command extends Expr {
+        Command(Cmd cmd) {
+            this.cmd = cmd;
+        }
+
+        @Override
+        <R> R accept(IExprVisitor<R> visitor) {
+            return visitor.visitExpr(this);
+        }
+
+        final Cmd cmd;
+    }
+
+    /**
      * Used when the expression is a grouping of other expressions, typically grouped with ().
      */
     static class Grouping extends Expr {
@@ -79,6 +98,7 @@ abstract class Expr {
             this.expression = expression;
         }
 
+        @Override
         <R> R accept(IExprVisitor<R> visitor) {
             return visitor.visitExpr(this);
         }
@@ -94,6 +114,7 @@ abstract class Expr {
             this.value = value;
         }
 
+        @Override
         <R> R accept(IExprVisitor<R> visitor) {
             return visitor.visitExpr(this);
         }
@@ -111,6 +132,7 @@ abstract class Expr {
             this.right = right;
         }
 
+        @Override
         <R> R accept(IExprVisitor<R> visitor) {
             return visitor.visitExpr(this);
         }
@@ -129,6 +151,7 @@ abstract class Expr {
             this.operator = operator;
         }
 
+        @Override
         <R> R accept(IExprVisitor<R> visitor) {
             return visitor.visitExpr(this);
         }
@@ -145,6 +168,7 @@ abstract class Expr {
             this.token = token;
         }
 
+        @Override
         <R> R accept(IExprVisitor<R> visitor) {
             return visitor.visitExpr(this);
         }

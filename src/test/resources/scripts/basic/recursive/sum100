@@ -1,0 +1,18 @@
+{
+var sum = 0;
+def sum_func(n) {
+    if (n == 1) {
+        return 1;
+    } else {
+        return n + sum_func(n - 1);
+    }
+}
+sum = sum_func(100);
+print "result should be 5050";
+print sum;
+if (sum == 5050) {
+    print "success";
+} else {
+    print "failure";
+}
+}

@@ -11,41 +11,46 @@ interface IExprVisitor<R> {
     /**
      * Used when the expression is being assigned to a variable.
      */
-    R visitExpr(Expr.Assign expression);
+    R visitExpr(Expr.Assign expr);
 
     /**
      * Used when the expression is a binary operation such as '4 + 5' or '6 > 3'.
      */
-    R visitExpr(Expr.Binary expression);
+    R visitExpr(Expr.Binary expr);
 
     /**
      * Used when the expression is a function call.
      */
-    R visitExpr(Expr.Call expression);
+    R visitExpr(Expr.Call expr);
+
+    /**
+     * Used when the expression contains a command issued to the program.
+     */
+    R visitExpr(Expr.Command expr);
 
     /**
      * Used when the expression is a grouping of other expressions, typically grouped with ().
      */
-    R visitExpr(Expr.Grouping expression);
+    R visitExpr(Expr.Grouping expr);
 
     /**
      * Used when the expression is a literal value such as a number or string.
      */
-    R visitExpr(Expr.Literal expression);
+    R visitExpr(Expr.Literal expr);
 
     /**
      * Used when the expression is a logical operation such as 'or' or 'and'.
      */
-    R visitExpr(Expr.Logical expression);
+    R visitExpr(Expr.Logical expr);
 
     /**
      * Used when the expression is a unary operation such as '-' for negating a number or '!' for negating a boolean.
      */
-    R visitExpr(Expr.Unary expression);
+    R visitExpr(Expr.Unary expr);
 
     /**
      * Used when the expression is a variable.
      */
-    R visitExpr(Expr.Variable expression);
+    R visitExpr(Expr.Variable expr);
 
 }

@@ -6,17 +6,37 @@ import java.util.List;
 
 public class Parser {
 
-    private final List<Token> tokenSequence;
+    private List<Token> tokenSequence;
     private int current = 0;
+    boolean commandMode;
 
-    Parser(List<Token> tokenSequence) {
+    Parser() {}
+
+    public static List<Stmt> staticParse(List<Token> tokenSequence) {
+        return staticParse(tokenSequence, false);
+    }
+
+    public static List<Stmt> staticParse(List<Token> tokenSequence, boolean commandMode) {
+        Parser parser = new Parser();
+        return parser.parse(tokenSequence, commandMode);
+    }
+
+    public List<Stmt> parse(List<Token> tokenSequence) {
+        return parse(tokenSequence, this.commandMode);
+    }
+
+    public List<Stmt> parse(List<Token> tokenSequence, boolean commandMode) {
         this.tokenSequence = tokenSequence;
+        this.commandMode = commandMode;
+        this.current = 0;
+
+        return parse();
     }
 
     /**
      * Parses the sequence of tokens contained by the Parser into a list of statements to execute.
      */
-    public List<Stmt> parse() {
+    private List<Stmt> parse() {
         try {
             List<Stmt> statements = new ArrayList<>();
             while (notEOF()) {
@@ -29,7 +49,17 @@ public class Parser {
 
     }
 
+    private Stmt statementDefault() {
+        if (matchToken(TokenType.SEMICOLON)) {
+            return new Stmt.Expression(new Expr.Literal(null));
+        }
+        return expressionStatement();
+    }
+
     private Stmt statement() {
+        if (matchToken(TokenType.COMMAND)) {
+            return commandStatement();
+        }
         if (matchToken(TokenType.FOR)) {
             return forStatement();
         }
@@ -48,7 +78,15 @@ public class Parser {
         if (matchToken(TokenType.BRACE_LEFT)) {
             return blockStatement();
         }
-        return expressionStatement();
+        return statementDefault();
+    }
+
+    private Stmt commandStatement() {
+        Cmd cmd = command();
+        if (!commandMode) {
+            requireToken(TokenType.SEMICOLON, "Expect ';' after value.");
+        }
+        return new Stmt.Command(cmd);
     }
 
     private Stmt forStatement() {
@@ -106,7 +144,12 @@ public class Parser {
 
     private Stmt printStatement() {
         Expr value = expression();
-        requireToken(TokenType.SEMICOLON, "Expect ';' after value.");
+        if (value == null) {
+            value = new Expr.Literal("");
+        }
+        if (!commandMode) {
+            requireToken(TokenType.SEMICOLON, "Expect ';' after value.");
+        }
         return new Stmt.Print(value);
     }
 
@@ -167,7 +210,7 @@ public class Parser {
         if (!checkCurrentToken(TokenType.PAREN_RIGHT)) {
             do {
                 if (parameters.size() >= 8) {
-
+                    /**/
                 }
                 parameters.add(requireToken(TokenType.IDENTIFIER, "Expect parameter name."));
             } while (matchToken(TokenType.COMMA));
@@ -315,7 +358,7 @@ public class Parser {
         if (!checkCurrentToken(TokenType.PAREN_RIGHT)) {
             do {
                 if (arguments.size() >= 8) {
-
+                    /**/
                 }
                 arguments.add(expression());
             } while (matchToken(TokenType.COMMA));
@@ -328,7 +371,7 @@ public class Parser {
      * Checks and parses the token. This has the highest priority so goes lowest in the tree.
      */
     private Expr primaryParseCheck() {
-        if (matchToken(TokenType.NUMBER, TokenType.STRING)) {
+        if (matchToken(TokenType.NUMBER, TokenType.STRING, TokenType.BOOLEAN)) {
             return new Expr.Literal(peekPrevious().literal);
         }
 
@@ -344,6 +387,112 @@ public class Parser {
 
         return null;
     }
+
+
+    /**
+     * Begins a series of checks to parse the command.
+     */
+    private Cmd command() {
+        Token commandToken = peekPrevious();
+
+        /*
+         * This is to be used for special cases for certain commands. Special cases will
+         * be parsed separately while others will be parsed according to default rules.
+         */
+        switch (commandToken.lexeme) {
+            case ("help") :         return helpCommand();
+            case ("exit") :         return exitCommand();
+            case ("reaction") :     return reactionCommand();
+            default:                return commandDefault(commandToken);
+        }
+    }
+
+    private Cmd reactionCommand() {
+        Arg.Flag flag = null;
+        if (matchToken(TokenType.MINUS)) {
+            if (matchToken(TokenType.MINUS)) {
+                throw error(peekCurrent(), "flag expected");
+            } else {
+                flag = collectFlag();
+            }
+        }
+        List<Arg.Argument> arguments = new ArrayList<>();
+        while (notEOF() && !matchToken(TokenType.SEMICOLON)) {
+            arguments.add(new Arg.Argument(primaryParseCheck()));
+        }
+        return new Cmd.Reaction(flag, arguments);
+    }
+
+    private Cmd commandDefault(Token commandToken) {
+        return collectCommandArgs();
+    }
+
+    private Cmd helpCommand() {
+        Token commandHelp = null;
+
+        if (notEOF() && !matchToken(TokenType.SEMICOLON)) {
+            commandHelp = requireToken(TokenType.COMMAND, "no such command");
+        }
+
+        return new Cmd.Help(commandHelp);
+    }
+
+    private Cmd exitCommand() {
+        return new Cmd.Exit();
+    }
+
+    /**
+     * Collects arguments passed to the command. A single minus denotes flags, double minus denotes a parameter
+     * with additional arguments.
+     * May pass expressions as arguments (must be grouped with parenthesis if containing more than one token).
+     */
+    private Cmd collectCommandArgs() {
+        Token commandToken = peekPrevious();
+        List<Arg> args = new ArrayList<>();
+
+        while (notEOF() && !matchToken(TokenType.SEMICOLON)) {
+
+            if (matchToken(TokenType.MINUS)) {
+                if (matchToken(TokenType.MINUS)) {
+                    args.add(collectParameterArguments());
+                } else {
+                    args.add(collectFlag());
+                }
+            } else {
+                args.add(new Arg.Argument(primaryParseCheck()));
+            }
+
+        }
+
+        return new Cmd.Default(commandToken, args);
+    }
+
+    /**
+     * Collects a parameter and a list of arguments for that parameter. Stops collecting arguments for parameter
+     * when a '-', ';', or EOF is encountered.
+     */
+    private Arg.Parameter collectParameterArguments() {
+        String parameter = requireToken(TokenType.IDENTIFIER, "parameter must be an identifier").lexeme;
+        List<Arg.Argument> arguments = new ArrayList<>();
+
+        while (notEOF() && !checkCurrentToken(TokenType.SEMICOLON, TokenType.MINUS)) {
+
+            while (matchToken(TokenType.COMMA))/**/;
+
+            arguments.add(new Arg.Argument(primaryParseCheck()));
+
+        }
+
+        return new Arg.Parameter(parameter, arguments);
+    }
+
+    /**
+     * Collects flags passed to the command. Identifier type token due to structure. Only string portion is used.
+     */
+    private Arg.Flag collectFlag() {
+        return new Arg.Flag(requireToken(TokenType.IDENTIFIER, "flag must be an identifier").lexeme);
+    }
+
 
     /**
      * Requires the next token to be of the specified type. Throws an error if type does not match.
@@ -406,6 +555,15 @@ public class Parser {
             }
         }
 
+        return false;
+    }
+
+    private boolean checkCurrentToken(TokenType... tokenTypes) {
+        for (TokenType tokenType : tokenTypes) {
+            if (checkCurrentToken(tokenType)) {
+                return true;
+            }
+        }
         return false;
     }
 

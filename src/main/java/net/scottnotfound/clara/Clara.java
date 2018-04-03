@@ -1,6 +1,7 @@
 package net.scottnotfound.clara;
 
 import net.scottnotfound.clara.lang.Lang;
+import net.scottnotfound.clara.reaction.ReactionModule;
 
 import java.io.IOException;
 
@@ -16,6 +17,8 @@ public class Clara {
 
 
     public static void main(String[] args) throws IOException {
+
+        ModuleRegistry.registerModule("Reaction", ReactionModule.getInstance());
 
         Lang.main(args);
 

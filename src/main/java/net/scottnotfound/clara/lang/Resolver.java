@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
-public class Resolver implements IExprVisitor<Void>, IStmtVisitor<Void> {
+public class Resolver implements IExprVisitor<Void>, IStmtVisitor<Void>, ICmdVisitor<Void>, IArgVisitor<Void> {
 
     private final Interpreter interpreter;
     private final Stack<Map<String, Boolean>> scopes = new Stack<>();
@@ -15,39 +15,32 @@ public class Resolver implements IExprVisitor<Void>, IStmtVisitor<Void> {
         this.interpreter = interpreter;
     }
 
-
-    @Override
-    public Void visitExpr(Expr.Literal expression) {
-        return null;
-    }
-
-    @Override
-    public Void visitExpr(Expr.Grouping expression) {
-        resolve(expression.expression);
-        return null;
-    }
-
-    @Override
-    public Void visitExpr(Expr.Unary expression) {
-        resolve(expression.expression);
-        return null;
-    }
-
-    @Override
-    public Void visitExpr(Expr.Binary expression) {
-        resolve(expression.expr_left);
-        resolve(expression.expr_right);
-        return null;
-    }
-
-    @Override
-    public Void visitExpr(Expr.Variable expression) {
-        if (!scopes.isEmpty() && scopes.peek().get(expression.token.lexeme) == Boolean.FALSE) {
-            Lang.error(expression.token, "Cannot read local variable in its own initializer.");
+    void resolveStmts(List<Stmt> statements) {
+        for (Stmt stmt : statements) {
+            resolve(stmt);
         }
+    }
 
-        resolveLocal(expression, expression.token);
-        return null;
+    void resolveArgs(List<Arg> args) {
+        for (Arg arg : args) {
+            resolve(arg);
+        }
+    }
+
+    private void resolve(Arg arg) {
+        arg.accept(this);
+    }
+
+    private void resolve(Cmd cmd) {
+        cmd.accept(this);
+    }
+
+    private void resolve(Stmt stmt) {
+        stmt.accept(this);
+    }
+
+    private void resolve(Expr expr) {
+        expr.accept(this);
     }
 
     private void resolveLocal(Expr expression, Token token) {
@@ -59,73 +52,6 @@ public class Resolver implements IExprVisitor<Void>, IStmtVisitor<Void> {
         }
     }
 
-    @Override
-    public Void visitExpr(Expr.Assign expression) {
-        resolve(expression.expression);
-        resolveLocal(expression, expression.token);
-        return null;
-    }
-
-    @Override
-    public Void visitExpr(Expr.Logical expression) {
-        resolve(expression.left);
-        resolve(expression.right);
-        return null;
-    }
-
-    @Override
-    public Void visitExpr(Expr.Call expression) {
-        resolve(expression.callee);
-        for (Expr argument : expression.arguments) {
-            resolve(argument);
-        }
-        return null;
-    }
-
-    @Override
-    public Void visitStmt(Stmt.Block statement) {
-        beginScope();
-        resolve(statement.statements);
-        endScope();
-        return null;
-    }
-
-    private void endScope() {
-        scopes.pop();
-    }
-
-    void resolve(List<Stmt> statements) {
-        for (Stmt stmt : statements) {
-            resolve(stmt);
-        }
-    }
-
-    private void resolve(Stmt stmt) {
-        stmt.accept(this);
-    }
-
-    private void resolve(Expr expr) {
-        expr.accept(this);
-    }
-
-    private void beginScope() {
-        scopes.push(new HashMap<>());
-    }
-
-    @Override
-    public Void visitStmt(Stmt.Expression statement) {
-        resolve(statement.expression);
-        return null;
-    }
-
-    @Override
-    public Void visitStmt(Stmt.Function statement) {
-        declare(statement.token);
-        define(statement.token);
-        resolveFunction(statement, FunctionType.FUNCTION);
-        return null;
-    }
-
     private void resolveFunction(Stmt.Function statement, FunctionType functionType) {
         FunctionType enclosingFunction = currentFunction;
         currentFunction = functionType;
@@ -134,46 +60,9 @@ public class Resolver implements IExprVisitor<Void>, IStmtVisitor<Void> {
             declare(param);
             define(param);
         }
-        resolve(statement.body);
+        resolveStmts(statement.body);
         endScope();
         currentFunction = enclosingFunction;
-    }
-
-    @Override
-    public Void visitStmt(Stmt.If statement) {
-        resolve(statement.condition);
-        resolve(statement.thenB);
-        if (statement.elseB != null) {
-            resolve(statement.elseB);
-        }
-        return null;
-    }
-
-    @Override
-    public Void visitStmt(Stmt.Print statement) {
-        resolve(statement.value);
-        return null;
-    }
-
-    @Override
-    public Void visitStmt(Stmt.Return statement) {
-        if (currentFunction == FunctionType.NONE) {
-            Lang.error(statement.token, "Cannot return from top-level code.");
-        }
-        if (statement.value != null) {
-            resolve(statement.value);
-        }
-        return null;
-    }
-
-    @Override
-    public Void visitStmt(Stmt.Variable statement) {
-        declare(statement.token);
-        if (statement.expression != null) {
-            resolve(statement.expression);
-        }
-        define(statement.token);
-        return null;
     }
 
     private void declare(Token token) {
@@ -193,11 +82,184 @@ public class Resolver implements IExprVisitor<Void>, IStmtVisitor<Void> {
         }
         scopes.peek().put(token.lexeme, true);
     }
+    private void endScope() {
+        scopes.pop();
+    }
+
+    private void beginScope() {
+        scopes.push(new HashMap<>());
+    }
+
 
     @Override
-    public Void visitStmt(Stmt.While statement) {
-        resolve(statement.condition);
-        resolve(statement.body);
+    public Void visitExpr(Expr.Literal expr) {
+        return null;
+    }
+
+    @Override
+    public Void visitExpr(Expr.Grouping expr) {
+        resolve(expr.expression);
+        return null;
+    }
+
+    @Override
+    public Void visitExpr(Expr.Unary expr) {
+        resolve(expr.expression);
+        return null;
+    }
+
+    @Override
+    public Void visitExpr(Expr.Binary expr) {
+        resolve(expr.expr_left);
+        resolve(expr.expr_right);
+        return null;
+    }
+
+    @Override
+    public Void visitExpr(Expr.Variable expr) {
+        if (!scopes.isEmpty() && scopes.peek().get(expr.token.lexeme) == Boolean.FALSE) {
+            Lang.error(expr.token, "Cannot read local variable in its own initializer.");
+        }
+
+        resolveLocal(expr, expr.token);
+        return null;
+    }
+
+    @Override
+    public Void visitExpr(Expr.Assign expr) {
+        resolve(expr.expression);
+        resolveLocal(expr, expr.token);
+        return null;
+    }
+
+    @Override
+    public Void visitExpr(Expr.Logical expr) {
+        resolve(expr.left);
+        resolve(expr.right);
+        return null;
+    }
+
+    @Override
+    public Void visitExpr(Expr.Call expr) {
+        resolve(expr.callee);
+        for (Expr argument : expr.arguments) {
+            resolve(argument);
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitExpr(Expr.Command expr) {
+        return null;
+    }
+
+    @Override
+    public Void visitStmt(Stmt.Block stmt) {
+        beginScope();
+        resolveStmts(stmt.statements);
+        endScope();
+        return null;
+    }
+
+    @Override
+    public Void visitStmt(Stmt.Command stmt) {
+        stmt.cmd.accept(this);
+        return null;
+    }
+
+    @Override
+    public Void visitStmt(Stmt.Expression stmt) {
+        resolve(stmt.expression);
+        return null;
+    }
+
+    @Override
+    public Void visitStmt(Stmt.Function stmt) {
+        declare(stmt.token);
+        define(stmt.token);
+        resolveFunction(stmt, FunctionType.FUNCTION);
+        return null;
+    }
+
+    @Override
+    public Void visitStmt(Stmt.If stmt) {
+        resolve(stmt.condition);
+        resolve(stmt.thenB);
+        if (stmt.elseB != null) {
+            resolve(stmt.elseB);
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitStmt(Stmt.Print stmt) {
+        resolve(stmt.value);
+        return null;
+    }
+
+    @Override
+    public Void visitStmt(Stmt.Return stmt) {
+        if (currentFunction == FunctionType.NONE) {
+            Lang.error(stmt.token, "Cannot return from top-level code.");
+        }
+        if (stmt.value != null) {
+            resolve(stmt.value);
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitStmt(Stmt.Variable stmt) {
+        declare(stmt.token);
+        if (stmt.expression != null) {
+            resolve(stmt.expression);
+        }
+        define(stmt.token);
+        return null;
+    }
+
+    @Override
+    public Void visitStmt(Stmt.While stmt) {
+        resolve(stmt.condition);
+        resolve(stmt.body);
+        return null;
+    }
+
+    @Override
+    public Void visitArg(Arg.Argument arg) {
+        return null;
+    }
+
+    @Override
+    public Void visitArg(Arg.Flag arg) {
+        return null;
+    }
+
+    @Override
+    public Void visitArg(Arg.Parameter arg) {
+        return null;
+    }
+
+    @Override
+    public Void visitCmd(Cmd.Default cmd) {
+        return null;
+    }
+
+    @Override
+    public Void visitCmd(Cmd.Exit cmd) {
+        return null;
+    }
+
+    @Override
+    public Void visitCmd(Cmd.Help cmd) {
+        return null;
+    }
+
+    @Override
+    public Void visitCmd(Cmd.Reaction cmd) {
+        for (Arg.Argument argument : cmd.reactants) {
+            resolve(argument);
+        }
         return null;
     }
 }
