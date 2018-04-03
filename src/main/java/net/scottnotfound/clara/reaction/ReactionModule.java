@@ -19,7 +19,7 @@ public class ReactionModule extends ModuleBase implements ICommandReceiver, IMod
     private static ReactionBuilder RB_INSTANCE;
 
     /* flags */
-
+    private boolean printFlag = false;
 
     /* reaction being operated on */
     private IReaction reaction = null;
@@ -50,12 +50,28 @@ public class ReactionModule extends ModuleBase implements ICommandReceiver, IMod
     }
 
     private void setFlags(String flagSequence) {
-
+        for (char f : flagSequence.toCharArray()) {
+            switch (f) {
+                case ('p') : {
+                    printFlag = true;
+                }
+            }
+        }
     }
 
     private void handleReactContent(List<String> reactants) {
         reaction = prepareReaction(reactants);
         reaction = solveReaction(reaction);
+
+        if (printFlag) {
+            System.out.println(reaction.toString());
+        }
+    }
+
+    private void resetModule() {
+        printFlag = false;
+
+        reaction = null;
     }
 
     @Override
@@ -104,10 +120,12 @@ public class ReactionModule extends ModuleBase implements ICommandReceiver, IMod
                 }
             }
         }
+
+        resetModule();
     }
 
     @Override
     public void refuseCommand(Map<String, Object> commandMap) {
-
+        resetModule();
     }
 }

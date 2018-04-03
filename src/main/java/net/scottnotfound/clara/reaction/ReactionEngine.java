@@ -20,7 +20,7 @@ class ReactionEngine {
 
     IReaction solveReaction(IReaction unsolvedReaction) {
 
-        return null;
+        return unsolvedReaction;
     }
 
 }
