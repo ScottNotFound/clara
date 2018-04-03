@@ -2,10 +2,7 @@ package net.scottnotfound.clara.lang;
 
 import net.scottnotfound.clara.Clara;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void>, IArgVisitor<Void>, ICmdVisitor<Void> {
 
@@ -199,7 +196,7 @@ public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void>, IA
 
     @Override
     public Object visitExpr(Expr.Command expr) {
-        return commandDistributor.carryOutCommand(expr.cmd);
+        return null;
     }
 
     @Override
@@ -255,7 +252,7 @@ public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void>, IA
 
     @Override
     public Void visitStmt(Stmt.Command stmt) {
-        commandDistributor.carryOutCommand(stmt.cmd);
+        stmt.cmd.accept(this);
         return null;
     }
 
@@ -378,6 +375,24 @@ public class Interpreter implements IExprVisitor<Object>, IStmtVisitor<Void>, IA
             }
 
         }
+        return null;
+    }
+
+    @Override
+    public Void visitCmd(Cmd.Reaction cmd) {
+        List<String> reactants = new ArrayList<>();
+        for (Arg.Argument arg : cmd.reactants) {
+            Object result = evaluateExpression(arg.expr);
+            try {
+                reactants.add((String) result);
+            } catch (Exception e) {
+                Lang.error(-1, e.getMessage());
+            }
+        }
+        Map<String,Object> commandMap = new TreeMap<>();
+        commandMap.put("flags", cmd.flags);
+        commandMap.put("reactants", reactants);
+        commandDistributor.distributeCommand(commandMap);
         return null;
     }
 }

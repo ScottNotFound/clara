@@ -63,5 +63,23 @@ abstract class Cmd {
         final Token command;
     }
 
+    /**
+     * Used when the command is the reaction command
+     */
+    static class Reaction extends Cmd {
+        Reaction(Arg.Flag flags, List<Arg.Argument> reactants) {
+            this.flags = (flags == null ? null : flags.flags);
+            this.reactants = reactants;
+        }
+
+        @Override
+        <R> R accept(ICmdVisitor<R> visitor) {
+            return visitor.visitCmd(this);
+        }
+
+        final String flags;
+        final List<Arg.Argument> reactants;
+    }
+
 
 }

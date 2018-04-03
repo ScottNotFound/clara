@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
-public class Resolver implements IExprVisitor<Void>, IStmtVisitor<Void> {
+public class Resolver implements IExprVisitor<Void>, IStmtVisitor<Void>, ICmdVisitor<Void>, IArgVisitor<Void> {
 
     private final Interpreter interpreter;
     private final Stack<Map<String, Boolean>> scopes = new Stack<>();
@@ -13,6 +13,81 @@ public class Resolver implements IExprVisitor<Void>, IStmtVisitor<Void> {
 
     Resolver(Interpreter interpreter) {
         this.interpreter = interpreter;
+    }
+
+    void resolveStmts(List<Stmt> statements) {
+        for (Stmt stmt : statements) {
+            resolve(stmt);
+        }
+    }
+
+    void resolveArgs(List<Arg> args) {
+        for (Arg arg : args) {
+            resolve(arg);
+        }
+    }
+
+    private void resolve(Arg arg) {
+        arg.accept(this);
+    }
+
+    private void resolve(Cmd cmd) {
+        cmd.accept(this);
+    }
+
+    private void resolve(Stmt stmt) {
+        stmt.accept(this);
+    }
+
+    private void resolve(Expr expr) {
+        expr.accept(this);
+    }
+
+    private void resolveLocal(Expr expression, Token token) {
+        for (int i = scopes.size() - 1; i >= 0; i--) {
+            if (scopes.get(i).containsKey(token.lexeme)) {
+                interpreter.resolve(expression, scopes.size() - 1 - i);
+                return;
+            }
+        }
+    }
+
+    private void resolveFunction(Stmt.Function statement, FunctionType functionType) {
+        FunctionType enclosingFunction = currentFunction;
+        currentFunction = functionType;
+        beginScope();
+        for (Token param : statement.parameters) {
+            declare(param);
+            define(param);
+        }
+        resolveStmts(statement.body);
+        endScope();
+        currentFunction = enclosingFunction;
+    }
+
+    private void declare(Token token) {
+        if (scopes.isEmpty()) {
+            return;
+        }
+        Map<String, Boolean> scope = scopes.peek();
+        if (scope.containsKey(token.lexeme)) {
+            Lang.error(token, "Variable with this name already declared in this scope.");
+        }
+        scope.put(token.lexeme, false);
+    }
+
+    private void define(Token token) {
+        if (scopes.isEmpty()) {
+            return;
+        }
+        scopes.peek().put(token.lexeme, true);
+    }
+    private void endScope() {
+        scopes.pop();
+    }
+
+    private void beginScope() {
+        scopes.push(new HashMap<>());
     }
 
 
@@ -50,15 +125,6 @@ public class Resolver implements IExprVisitor<Void>, IStmtVisitor<Void> {
         return null;
     }
 
-    private void resolveLocal(Expr expression, Token token) {
-        for (int i = scopes.size() - 1; i >= 0; i--) {
-            if (scopes.get(i).containsKey(token.lexeme)) {
-                interpreter.resolve(expression, scopes.size() - 1 - i);
-                return;
-            }
-        }
-    }
-
     @Override
     public Void visitExpr(Expr.Assign expr) {
         resolve(expr.expression);
@@ -90,36 +156,15 @@ public class Resolver implements IExprVisitor<Void>, IStmtVisitor<Void> {
     @Override
     public Void visitStmt(Stmt.Block stmt) {
         beginScope();
-        resolve(stmt.statements);
+        resolveStmts(stmt.statements);
         endScope();
         return null;
     }
 
     @Override
     public Void visitStmt(Stmt.Command stmt) {
+        stmt.cmd.accept(this);
         return null;
-    }
-
-    private void endScope() {
-        scopes.pop();
-    }
-
-    void resolve(List<Stmt> statements) {
-        for (Stmt stmt : statements) {
-            resolve(stmt);
-        }
-    }
-
-    private void resolve(Stmt stmt) {
-        stmt.accept(this);
-    }
-
-    private void resolve(Expr expr) {
-        expr.accept(this);
-    }
-
-    private void beginScope() {
-        scopes.push(new HashMap<>());
     }
 
     @Override
@@ -134,19 +179,6 @@ public class Resolver implements IExprVisitor<Void>, IStmtVisitor<Void> {
         define(stmt.token);
         resolveFunction(stmt, FunctionType.FUNCTION);
         return null;
-    }
-
-    private void resolveFunction(Stmt.Function statement, FunctionType functionType) {
-        FunctionType enclosingFunction = currentFunction;
-        currentFunction = functionType;
-        beginScope();
-        for (Token param : statement.parameters) {
-            declare(param);
-            define(param);
-        }
-        resolve(statement.body);
-        endScope();
-        currentFunction = enclosingFunction;
     }
 
     @Override
@@ -186,28 +218,48 @@ public class Resolver implements IExprVisitor<Void>, IStmtVisitor<Void> {
         return null;
     }
 
-    private void declare(Token token) {
-        if (scopes.isEmpty()) {
-            return;
-        }
-        Map<String, Boolean> scope = scopes.peek();
-        if (scope.containsKey(token.lexeme)) {
-            Lang.error(token, "Variable with this name already declared in this scope.");
-        }
-        scope.put(token.lexeme, false);
-    }
-
-    private void define(Token token) {
-        if (scopes.isEmpty()) {
-            return;
-        }
-        scopes.peek().put(token.lexeme, true);
-    }
-
     @Override
     public Void visitStmt(Stmt.While stmt) {
         resolve(stmt.condition);
         resolve(stmt.body);
+        return null;
+    }
+
+    @Override
+    public Void visitArg(Arg.Argument arg) {
+        return null;
+    }
+
+    @Override
+    public Void visitArg(Arg.Flag arg) {
+        return null;
+    }
+
+    @Override
+    public Void visitArg(Arg.Parameter arg) {
+        return null;
+    }
+
+    @Override
+    public Void visitCmd(Cmd.Default cmd) {
+        return null;
+    }
+
+    @Override
+    public Void visitCmd(Cmd.Exit cmd) {
+        return null;
+    }
+
+    @Override
+    public Void visitCmd(Cmd.Help cmd) {
+        return null;
+    }
+
+    @Override
+    public Void visitCmd(Cmd.Reaction cmd) {
+        for (Arg.Argument argument : cmd.reactants) {
+            resolve(argument);
+        }
         return null;
     }
 }

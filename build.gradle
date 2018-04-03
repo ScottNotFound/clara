@@ -16,15 +16,20 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
     testCompile group: 'junit', name: 'junit', version: '4.12'
 
-
+    // interfacing and logging
     compile 'commons-cli:commons-cli:1.4'
     compile 'commons-io:commons-io:2.6'
     compile 'org.apache.logging.log4j:log4j-api:2.10.0'
     compile 'org.apache.logging.log4j:log4j-core:2.10.0'
 
+    // chemistry libraries
     compile 'org.apache.chemistry.opencmis:chemistry-opencmis-commons-impl:1.1.0'
     compile 'uk.ac.cam.ch.opsin:opsin-core:2.3.1'
     compile 'org.openscience.cdk:cdk-bundle:2.1.1'
+
+    // machine learning (TensorFlow)
+    compile 'org.tensorflow:tensorflow:1.6.0'
+
 }
 
 jacocoTestReport {
