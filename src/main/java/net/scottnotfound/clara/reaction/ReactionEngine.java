@@ -29,7 +29,7 @@ class ReactionEngine {
 
     IReaction solveSimpleSN2Reaction(IReaction unsolvedReaction) {
         if (!checkSimpleSN2(unsolvedReaction)) {
-            System.out.println("Reaction is not a valid single halogen SN2 reaction with alkali halogen salt.");
+            System.out.println("Reaction is not a valid single halogen alkane SN2 reaction with alkali halogen salt.");
         }
 
         return unsolvedReaction;
