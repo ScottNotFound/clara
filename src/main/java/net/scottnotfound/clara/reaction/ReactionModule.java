@@ -46,7 +46,7 @@ public class ReactionModule extends ModuleBase implements ICommandReceiver, IMod
     }
 
     private IReaction solveReaction(IReaction unsolvedReaction) {
-        return RE_INSTANCE.solveReaction(unsolvedReaction);
+        return RE_INSTANCE.solveSimpleSN2Reaction(unsolvedReaction);
     }
 
     private void setFlags(String flagSequence) {
