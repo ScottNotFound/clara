@@ -4,11 +4,18 @@ import org.openscience.cdk.AtomContainerSet;
 import org.openscience.cdk.Reaction;
 import org.openscience.cdk.interfaces.*;
 import org.openscience.cdk.qsar.DescriptorValue;
+import org.openscience.cdk.qsar.IAtomicDescriptor;
+import org.openscience.cdk.qsar.IBondDescriptor;
 import org.openscience.cdk.qsar.descriptors.atomic.AtomHybridizationVSEPRDescriptor;
+import org.openscience.cdk.qsar.descriptors.atomic.CovalentRadiusDescriptor;
+import org.openscience.cdk.qsar.descriptors.bond.BondPartialPiChargeDescriptor;
+import org.openscience.cdk.qsar.descriptors.bond.BondPartialSigmaChargeDescriptor;
+import org.openscience.cdk.qsar.descriptors.bond.BondPartialTChargeDescriptor;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
 import org.openscience.cdk.smiles.SmilesParser;
 import uk.ac.cam.ch.wwmm.opsin.NameToStructure;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,12 +81,16 @@ class ReactionBuilder {
 
     private IReaction computeProperties(IReaction reaction) {
 
+        reaction = computePartialCharge(reaction);
+        reaction = computeHybridization(reaction);
+        reaction = computeCovalentRadius(reaction);
+
         return reaction;
     }
 
     private IReaction computeHybridization(IReaction reaction) {
 
-        AtomHybridizationVSEPRDescriptor hybridizationVSEPRDescriptor = new AtomHybridizationVSEPRDescriptor();
+        IAtomicDescriptor hybridizationVSEPRDescriptor = new AtomHybridizationVSEPRDescriptor();
 
         for (IAtomContainer mol : reaction.getReactants().atomContainers()) {
 
@@ -108,4 +119,55 @@ class ReactionBuilder {
 
         return reaction;
     }
+
+    private IReaction computeCovalentRadius(IReaction reaction) {
+
+        IAtomicDescriptor covalentRadiusDescriptor = null;
+
+        try {
+            covalentRadiusDescriptor = new CovalentRadiusDescriptor();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        for (IAtomContainer mol : reaction.getReactants().atomContainers()) {
+
+            for (IAtom atom : mol.atoms()) {
+
+                DescriptorValue descriptorValue = covalentRadiusDescriptor.calculate(atom, mol);
+                Double radius = Double.parseDouble(descriptorValue.getValue().toString());
+
+                atom.setCovalentRadius(radius);
+
+            }
+
+        }
+
+        return reaction;
+    }
+
+    private IReaction computePartialCharge(IReaction reaction) {
+
+        IBondDescriptor partialPiChargeDescriptor       = new BondPartialPiChargeDescriptor();
+        IBondDescriptor partialSigmaChargeDescriptor    = new BondPartialSigmaChargeDescriptor();
+        IBondDescriptor partialTChargeDescriptor        = new BondPartialTChargeDescriptor();
+
+        for (IAtomContainer mol : reaction.getReactants().atomContainers()) {
+
+            for (IBond bond : mol.bonds()) {
+
+                Object partialPiCharge      = partialPiChargeDescriptor.calculate(bond, mol).getValue().toString();
+                Object partialSigmaCharge   = partialSigmaChargeDescriptor.calculate(bond, mol).getValue().toString();
+                Object partialTCharge       = partialTChargeDescriptor.calculate(bond, mol).getValue().toString();
+
+                bond.setProperty("partialPiCharge", partialPiCharge);
+                bond.setProperty("partialSigmaCharge", partialSigmaCharge);
+                bond.setProperty("partialTCharge", partialTCharge);
+
+            }
+        }
+
+        return reaction;
+    }
+
 }
