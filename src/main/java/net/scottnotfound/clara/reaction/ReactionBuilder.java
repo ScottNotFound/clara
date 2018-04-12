@@ -35,11 +35,34 @@ class ReactionBuilder {
     private ReactionBuilder() {
         NTS_INSTANCE = NameToStructure.getInstance();
         SP_INSTANCE = new SmilesParser(SilentChemObjectBuilder.getInstance());
-
     }
 
-    IReaction build(List<String> reactants) {
-        return this.build(reactants, new ArrayList<>());
+    IReactionProfile buildProfile(List<String> reactants) {
+        return new ReactionProfile(buildReaction(reactants));
+    }
+
+    IReactionProfile buildProfile(List<String> reactants, String flagSequence) {
+        return new ReactionProfile(buildReaction(reactants), flagSequence);
+    }
+
+    IReactionProfile buildProfile(List<String> reactants, List<String> agents) {
+        return new ReactionProfile(buildReaction(reactants, agents));
+    }
+
+    IReactionProfile buildProfile(List<String> reactants, List<String> agents, String flagSequence) {
+        return new ReactionProfile(buildReaction(reactants, agents), flagSequence);
+    }
+
+    IReactionProfile buildProfile(IReaction reaction) {
+        return new ReactionProfile(reaction);
+    }
+
+    IReactionProfile buildProfile(IReaction reaction, String flagSequence) {
+        return new ReactionProfile(reaction, flagSequence);
+    }
+
+    private IReaction buildReaction(List<String> reactants) {
+        return this.buildReaction(reactants, new ArrayList<>());
     }
 
     /**
@@ -50,7 +73,7 @@ class ReactionBuilder {
      * @param agentNames names of agents
      * @return built reaction
      */
-    IReaction build(List<String> reactantNames, List<String> agentNames) {
+    private IReaction buildReaction(List<String> reactantNames, List<String> agentNames) {
 
         List<String> reactantSmiles = namesToSmiles(reactantNames);
         List<String> agentSmiles = namesToSmiles(agentNames);
