@@ -42,7 +42,7 @@ sourceSets {
             compileClasspath += sourceSets.main.output
             runtimeClasspath += sourceSets.main.output
         }
-        dependencies {
+        cpp{
 
         }
     }
@@ -50,9 +50,18 @@ sourceSets {
         java {
 
         }
+        cpp {
+            source {
+                srcDirs "src/main/cpp" as Closure
+                include "**/*.cpp" as Closure
+            }
+        }
     }
     test {
         java {
+
+        }
+        cpp {
 
         }
     }
