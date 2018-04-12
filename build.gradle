@@ -1,8 +1,12 @@
-group 'net.scottnotfound'
+plugins {
+    id "com.jetbrains.python.envs" version "0.0.25"
 
-apply plugin: 'java'
-apply plugin: 'idea'
-apply plugin: 'jacoco'
+    id 'java'
+    id 'idea'
+    id 'jacoco'
+    id 'cpp'
+    id 'signing'
+}
 
 sourceCompatibility = 1.8
 
@@ -30,6 +34,28 @@ dependencies {
     // machine learning (TensorFlow)
     compile 'org.tensorflow:tensorflow:1.6.0'
 
+}
+
+sourceSets {
+    api {
+        java {
+            compileClasspath += sourceSets.main.output
+            runtimeClasspath += sourceSets.main.output
+        }
+        dependencies {
+
+        }
+    }
+    main {
+        java {
+
+        }
+    }
+    test {
+        java {
+
+        }
+    }
 }
 
 jacocoTestReport {
