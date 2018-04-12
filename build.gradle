@@ -42,27 +42,46 @@ sourceSets {
             compileClasspath += sourceSets.main.output
             runtimeClasspath += sourceSets.main.output
         }
-        cpp{
-
-        }
     }
     main {
         java {
-
-        }
-        cpp {
-            source {
-                srcDirs "src/main/cpp" as Closure
-                include "**/*.cpp" as Closure
-            }
+            srcDir "src/main/python"
         }
     }
     test {
         java {
 
         }
-        cpp {
+    }
+}
 
+model {
+    toolChains {
+        gcc(Gcc) {
+            path "%MINGW%/bin"
+        }
+    }
+    flavors {
+        passing
+        failing
+    }
+    platforms {
+        x86 {
+            architecture "x86"
+        }
+    }
+    components {
+        main(NativeExecutableSpec) {
+            targetPlatform "x86"
+
+            sources {
+                cpp {
+                    source {
+                        srcDir "src/main/cpp"
+                        include "**/*.cpp"
+                    }
+                }
+            }
         }
     }
 }
