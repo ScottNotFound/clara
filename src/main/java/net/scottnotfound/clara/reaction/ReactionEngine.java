@@ -39,6 +39,14 @@ class ReactionEngine {
         return reaction.getReactantCount() != 1;
     }
 
+    /**
+     * Checks the reaction to see of the reaction is between a haloalkane and a halogen alkali salt.
+     * The halogen must not be on a tertiary carbon and there may be only one halogen in the reacting molecule.
+     * The reacting molecule must also be under 30 atoms in size.
+     *
+     * @param reaction reaction to check
+     * @return true if the reaction is valid, false otherwise
+     */
     private boolean checkSimpleSN2(IReaction reaction) {
 
         if (!isValidReaction(reaction)) {

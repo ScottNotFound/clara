@@ -42,6 +42,14 @@ class ReactionBuilder {
         return this.build(reactants, new ArrayList<>());
     }
 
+    /**
+     * Builds a reaction from the list of reactants and agents. The built reaction will
+     * contain no products.
+     *
+     * @param reactantNames names of reactants
+     * @param agentNames names of agents
+     * @return built reaction
+     */
     IReaction build(List<String> reactantNames, List<String> agentNames) {
 
         List<String> reactantSmiles = namesToSmiles(reactantNames);
@@ -57,6 +65,12 @@ class ReactionBuilder {
         return reaction;
     }
 
+    /**
+     * Constructs a list of names from a list of smiles.
+     *
+     * @param names list of names
+     * @return list of smiles
+     */
     private List<String> namesToSmiles(List<String> names) {
         List<String> smiles = new ArrayList<>();
         for (String name : names) {
@@ -66,6 +80,12 @@ class ReactionBuilder {
         return smiles;
     }
 
+    /**
+     * Constructs a set of molecules from a list of smiles.
+     *
+     * @param smiles list of smiles
+     * @return set of molecules
+     */
     private IAtomContainerSet smilesToAtomContainerSet(List<String> smiles) {
         IAtomContainerSet atomContainerSet = new AtomContainerSet();
         for (String smile : smiles) {
@@ -79,6 +99,12 @@ class ReactionBuilder {
         return atomContainerSet;
     }
 
+    /**
+     * Computes properties of the molecules in a reaction.
+     *
+     * @param reaction reaction to compute properties of
+     * @return the same reaction with computed properties
+     */
     private IReaction computeProperties(IReaction reaction) {
 
         reaction = computePartialCharge(reaction);
@@ -88,6 +114,12 @@ class ReactionBuilder {
         return reaction;
     }
 
+    /**
+     * Computes hybridization of the atoms of the molecules in a reaction.
+     *
+     * @param reaction reaction to compute properties of
+     * @return the same reaction with computed properties
+     */
     private IReaction computeHybridization(IReaction reaction) {
 
         IAtomicDescriptor hybridizationVSEPRDescriptor = new AtomHybridizationVSEPRDescriptor();
@@ -120,6 +152,12 @@ class ReactionBuilder {
         return reaction;
     }
 
+    /**
+     * Computes covalent radii of the atoms of the molecules in a reaction.
+     *
+     * @param reaction reaction to compute properties of
+     * @return the same reaction with computed properties
+     */
     private IReaction computeCovalentRadius(IReaction reaction) {
 
         IAtomicDescriptor covalentRadiusDescriptor = null;
@@ -146,6 +184,12 @@ class ReactionBuilder {
         return reaction;
     }
 
+    /**
+     * Computes partial charges of the molecules in a reaction.
+     *
+     * @param reaction reaction to compute properties of
+     * @return the same reaction with computed properties
+     */
     private IReaction computePartialCharge(IReaction reaction) {
 
         IBondDescriptor partialPiChargeDescriptor       = new BondPartialPiChargeDescriptor();
