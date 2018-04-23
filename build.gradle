@@ -1,5 +1,5 @@
 plugins {
-    id "com.jetbrains.python.envs" version "0.0.25"
+    id 'com.jetbrains.python.envs' version '0.0.25'
 
     id 'java'
     id 'idea'
@@ -45,7 +45,7 @@ sourceSets {
     }
     main {
         java {
-            srcDir "src/main/python"
+
         }
     }
     test {
