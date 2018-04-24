@@ -1,10 +1,19 @@
 package net.scottnotfound.clara.reaction;
 
+import org.openscience.cdk.AtomContainerSet;
+import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.fingerprint.*;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.interfaces.IAtomContainerSet;
 import org.openscience.cdk.interfaces.IReaction;
 import org.openscience.cdk.qsar.DescriptorValue;
 import org.openscience.cdk.qsar.descriptors.atomic.AtomHybridizationVSEPRDescriptor;
+
+import java.util.BitSet;
+import java.util.Spliterator;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 class ReactionEngine {
 
@@ -114,6 +123,43 @@ class ReactionEngine {
         }
 
         return true;
+    }
+
+    private BitSet generateFoldedFP(IReaction reaction, int FPclass, int dim) {
+
+        IBitFingerprint bitSetFingerprint   = new BitSetFingerprint(dim);
+        IFingerprinter fingerprinter        = new CircularFingerprinter(FPclass, dim);
+
+        IAtomContainerSet atomContainerSet = new AtomContainerSet();
+        atomContainerSet.add(reaction.getReactants());
+        atomContainerSet.add(reaction.getAgents());
+
+        Spliterator<IAtomContainer> atomContainerSpliterator = atomContainerSet.atomContainers().spliterator();
+        Stream<IAtomContainer> atomContainerStream = StreamSupport.stream(atomContainerSpliterator, true);
+
+        atomContainerStream.forEach(mol ->
+                                    {
+                                        try {
+                                            bitSetFingerprint.or(fingerprinter.getBitFingerprint(mol));
+                                        } catch (CDKException e) {
+                                            e.printStackTrace();
+                                        }
+                                    });
+
+        return bitSetFingerprint.asBitSet();
+    }
+
+    private BitSet foldCFP(ICountFingerprint countFingerprint, int dim) {
+
+        final BitSet bitSet = new BitSet(dim);
+
+        for (int k = 0; k < countFingerprint.numOfPopulatedbins(); k++) {
+            int i = countFingerprint.getHash(k);
+            long b = i >= 0 ? i : ((i & 0x7FFFFFFF) | (1L << 31));
+            bitSet.set((int) (b % dim));
+        }
+
+        return bitSet;
     }
 
 }
