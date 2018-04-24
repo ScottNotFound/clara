@@ -6,14 +6,17 @@ plugins {
     id 'jacoco'
     id 'cpp'
     id 'signing'
+    id 'google-test'
 }
 
 sourceCompatibility = 1.8
 
-repositories {
-    mavenCentral()
-    mavenLocal()
-    jcenter()
+allprojects{
+    repositories {
+        mavenCentral()
+        mavenLocal()
+        jcenter()
+    }
 }
 
 dependencies {
@@ -55,6 +58,7 @@ sourceSets {
     }
 }
 
+/*
 model {
     toolChains {
         gcc(Gcc) {
@@ -78,13 +82,14 @@ model {
                 cpp {
                     source {
                         srcDir "src/main/cpp"
-                        include "**/*.cpp"
+                        include "*.cpp"
                     }
                 }
             }
         }
     }
 }
+*/
 
 jacocoTestReport {
     reports {
@@ -99,7 +104,7 @@ jar {
         attributes 'Bundle-License': 'https://www.apache.org/licenses/LICENSE-2.0.txt'
         attributes 'Bundle-Name': 'Clara'
         attributes 'Main-Class': 'net.scottnotfound.clara.Clara'
-        attributes 'Bundle-Version': version
+        attributes 'Bundle-Version': '0.0.6'
     }
 }
 
@@ -115,7 +120,7 @@ task("fatJar") {
             attributes 'Bundle-License': 'https://www.apache.org/licenses/LICENSE-2.0.txt'
             attributes 'Bundle-Name': 'Clara'
             attributes 'Main-Class': 'net.scottnotfound.clara.Clara'
-            attributes 'Bundle-Version': version
+            attributes 'Bundle-Version': '0.0.6'
         }
     }
     dependsOn 'jar'
