@@ -8,7 +8,7 @@ import java.io.IOException;
 public class Clara {
 
     public static final String APP_NAME = "Clara";
-    public static final String APP_VERSION = "0.0.005";
+    public static final String APP_VERSION = "0.0.006";
     public static final boolean isSNAPSHOT = true;
 
     private static Clara instance;

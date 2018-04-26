@@ -5,7 +5,6 @@ import net.scottnotfound.clara.ModuleBase;
 import net.scottnotfound.clara.ModuleRegistry;
 import net.scottnotfound.clara.RegisterModule;
 import net.scottnotfound.clara.lang.ICommandReceiver;
-import org.openscience.cdk.interfaces.IReaction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,13 +15,7 @@ public class ReactionModule extends ModuleBase implements ICommandReceiver, IMod
     /* Singleton instances */
     private static ReactionModule RM_INSTANCE;
     private static ReactionEngine RE_INSTANCE;
-    private static ReactionBuilder RB_INSTANCE;
 
-    /* flags */
-    private boolean printFlag = false;
-
-    /* reaction being operated on */
-    private IReaction reaction = null;
 
     public static ReactionModule getInstance() {
         if (RM_INSTANCE == null) {
@@ -33,7 +26,6 @@ public class ReactionModule extends ModuleBase implements ICommandReceiver, IMod
 
     private ReactionModule() {
         RE_INSTANCE = ReactionEngine.getInstance();
-        RB_INSTANCE = ReactionBuilder.getInstance();
     }
 
     @RegisterModule(moduleName = "Reaction")
@@ -41,41 +33,26 @@ public class ReactionModule extends ModuleBase implements ICommandReceiver, IMod
         ModuleRegistry.registerModule("Reaction", getInstance());
     }
 
-    private IReaction prepareReaction(List<String> reactants) {
-        return RB_INSTANCE.build(reactants);
+    private void solveReaction(IReactionProfile profile) {
+        profile.setReaction(RE_INSTANCE.solveReaction(profile.getReaction()));
     }
 
-    private IReaction solveReaction(IReaction unsolvedReaction) {
-        return RE_INSTANCE.solveReaction(unsolvedReaction);
-    }
+    private void handleReactContent(List<String> reactants, List<String> agents, String flagSequence) {
+        ReactionProfileBuilder builder = new ReactionProfileBuilder(flagSequence);
+        IReactionProfile profile = builder
+                .addReactants(reactants)
+                .addAgents(agents)
+                .buildProfile();
 
-    private void setFlags(String flagSequence) {
-        for (char f : flagSequence.toCharArray()) {
-            switch (f) {
-                case ('p') : {
-                    printFlag = true;
-                }
-            }
-        }
-    }
-
-    private void handleReactContent(List<String> reactants) {
-        reaction = prepareReaction(reactants);
-        reaction = solveReaction(reaction);
-
-        if (printFlag) {
-            System.out.println(reaction.toString());
-        }
-    }
-
-    private void resetModule() {
-        printFlag = false;
-
-        reaction = null;
+        solveReaction(profile);
     }
 
     @Override
-    public void executeCommand(Map<String, Object> commandMap) {
+    public void receiveCommand(Map<String, Object> commandMap) {
+
+        String flagSequence = "";
+        List<String> reactants = new ArrayList<>();
+        List<String> agents = new ArrayList<>();
 
         for (Map.Entry<String,Object> entry : commandMap.entrySet()) {
 
@@ -85,8 +62,7 @@ public class ReactionModule extends ModuleBase implements ICommandReceiver, IMod
             if (descriptor.contains("flag")) {
 
                 if (object instanceof String) {
-                    String flagSequence = (String) object;
-                    setFlags(flagSequence);
+                    flagSequence = (String) object;
                 } else {
                     // this should be impossible
                     continue;
@@ -106,12 +82,9 @@ public class ReactionModule extends ModuleBase implements ICommandReceiver, IMod
 
                         if (list.toArray()[0] instanceof String) {
 
-                            List<String> reactants = new ArrayList<>();
                             for (Object item : list) {
                                 reactants.add((String) item);
                             }
-
-                            handleReactContent(reactants);
 
                         } else {
                             continue;
@@ -119,13 +92,20 @@ public class ReactionModule extends ModuleBase implements ICommandReceiver, IMod
                     }
                 }
             }
+
+            if (descriptor.contains("agent")) {
+
+                //
+
+            }
         }
 
-        resetModule();
+        handleReactContent(reactants, agents, flagSequence);
+
     }
 
     @Override
     public void refuseCommand(Map<String, Object> commandMap) {
-        resetModule();
+
     }
 }

@@ -7,7 +7,7 @@ import java.util.Map;
  */
 public interface ICommandReceiver {
 
-    void executeCommand(Map<String, Object> commandMap);
+    void receiveCommand(Map<String, Object> commandMap);
 
     void refuseCommand(Map<String, Object> commandMap);
 
