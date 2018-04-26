@@ -11,17 +11,16 @@ class CommandDistributor {
 
     }
 
-    Object distributeCommand(Map<String, Object> commandMap) {
+    void distributeCommand(Map<String, Object> commandMap) {
         Map<String,IModule> registry = ModuleRegistry.getModuleRegistry();
         for (Map.Entry<String,IModule> entry : registry.entrySet()) {
             String moduleName = entry.getKey();
             IModule module = entry.getValue();
             if (module instanceof ICommandReceiver) {
                 ICommandReceiver commandReceiver = (ICommandReceiver) module;
-                commandReceiver.executeCommand(commandMap);
+                commandReceiver.receiveCommand(commandMap);
             }
         }
-        return null;
     }
 
     Object haltCommand(Cmd command) {

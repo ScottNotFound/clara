@@ -1,15 +1,22 @@
-group 'net.scottnotfound'
+plugins {
+    id 'com.jetbrains.python.envs' version '0.0.25'
 
-apply plugin: 'java'
-apply plugin: 'idea'
-apply plugin: 'jacoco'
+    id 'java'
+    id 'idea'
+    id 'jacoco'
+    id 'cpp'
+    id 'signing'
+    id 'google-test'
+}
 
 sourceCompatibility = 1.8
 
-repositories {
-    mavenCentral()
-    mavenLocal()
-    jcenter()
+allprojects{
+    repositories {
+        mavenCentral()
+        mavenLocal()
+        jcenter()
+    }
 }
 
 dependencies {
@@ -30,7 +37,61 @@ dependencies {
     // machine learning (TensorFlow)
     compile 'org.tensorflow:tensorflow:1.6.0'
 
+    compile 'org.deeplearning4j:deeplearning4j-core:1.0.0-alpha'
+
 }
+
+sourceSets {
+    api {
+        java {
+            compileClasspath += sourceSets.main.output
+            runtimeClasspath += sourceSets.main.output
+        }
+    }
+    main {
+        java {
+
+        }
+    }
+    test {
+        java {
+
+        }
+    }
+}
+
+/*
+model {
+    toolChains {
+        gcc(Gcc) {
+            path "%MINGW%/bin"
+        }
+    }
+    flavors {
+        passing
+        failing
+    }
+    platforms {
+        x86 {
+            architecture "x86"
+        }
+    }
+    components {
+        main(NativeExecutableSpec) {
+            targetPlatform "x86"
+
+            sources {
+                cpp {
+                    source {
+                        srcDir "src/main/cpp"
+                        include "*.cpp"
+                    }
+                }
+            }
+        }
+    }
+}
+*/
 
 jacocoTestReport {
     reports {
@@ -45,7 +106,7 @@ jar {
         attributes 'Bundle-License': 'https://www.apache.org/licenses/LICENSE-2.0.txt'
         attributes 'Bundle-Name': 'Clara'
         attributes 'Main-Class': 'net.scottnotfound.clara.Clara'
-        attributes 'Bundle-Version': version
+        attributes 'Bundle-Version': '0.0.6'
     }
 }
 
@@ -61,7 +122,7 @@ task("fatJar") {
             attributes 'Bundle-License': 'https://www.apache.org/licenses/LICENSE-2.0.txt'
             attributes 'Bundle-Name': 'Clara'
             attributes 'Main-Class': 'net.scottnotfound.clara.Clara'
-            attributes 'Bundle-Version': version
+            attributes 'Bundle-Version': '0.0.6'
         }
     }
     dependsOn 'jar'
