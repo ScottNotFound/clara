@@ -31,3 +31,5 @@ Thumbs.db
 *.jar
 *.out
 !/gradle/wrapper/gradle-wrapper.jar
+
+/run
