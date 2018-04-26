@@ -37,6 +37,8 @@ dependencies {
     // machine learning (TensorFlow)
     compile 'org.tensorflow:tensorflow:1.6.0'
 
+    compile 'org.deeplearning4j:deeplearning4j-core:1.0.0-alpha'
+
 }
 
 sourceSets {

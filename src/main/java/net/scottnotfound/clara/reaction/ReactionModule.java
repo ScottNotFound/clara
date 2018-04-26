@@ -15,7 +15,6 @@ public class ReactionModule extends ModuleBase implements ICommandReceiver, IMod
     /* Singleton instances */
     private static ReactionModule RM_INSTANCE;
     private static ReactionEngine RE_INSTANCE;
-    private static ReactionBuilder RB_INSTANCE;
 
 
     public static ReactionModule getInstance() {
@@ -27,7 +26,6 @@ public class ReactionModule extends ModuleBase implements ICommandReceiver, IMod
 
     private ReactionModule() {
         RE_INSTANCE = ReactionEngine.getInstance();
-        RB_INSTANCE = ReactionBuilder.getInstance();
     }
 
     @RegisterModule(moduleName = "Reaction")
@@ -36,16 +34,17 @@ public class ReactionModule extends ModuleBase implements ICommandReceiver, IMod
     }
 
     private void solveReaction(IReactionProfile profile) {
-        profile.setReaction(RE_INSTANCE.solveSimpleSN2Reaction(profile.getReaction()));
+        profile.setReaction(RE_INSTANCE.solveReaction(profile.getReaction()));
     }
 
     private void handleReactContent(List<String> reactants, List<String> agents, String flagSequence) {
-        IReactionProfile profile = RB_INSTANCE.buildProfile(reactants, agents, flagSequence);
-        solveReaction(profile);
+        ReactionProfileBuilder builder = new ReactionProfileBuilder(flagSequence);
+        IReactionProfile profile = builder
+                .addReactants(reactants)
+                .addAgents(agents)
+                .buildProfile();
 
-        if (profile.isPrintFlag()) {
-            System.out.println(profile.getReaction().toString());
-        }
+        solveReaction(profile);
     }
 
     @Override

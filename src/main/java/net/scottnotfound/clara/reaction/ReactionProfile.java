@@ -1,31 +1,45 @@
 package net.scottnotfound.clara.reaction;
 
+import org.openscience.cdk.Reaction;
 import org.openscience.cdk.interfaces.IReaction;
 
-import java.util.HashMap;
-import java.util.Map;
-
-class ReactionProfile implements IReactionProfile {
+public class ReactionProfile implements IReactionProfile {
 
     private IReaction reaction;
 
-    /* flags */
-    private Map<String,Boolean> flags = new HashMap<>();
-
     private boolean solved = false;
+    private String flags;
 
 
     ReactionProfile() {
-        this.reaction = null;
+        this.reaction = new Reaction();
+        this.flags = "";
     }
 
     ReactionProfile(IReaction reaction) {
         this.reaction = reaction;
     }
 
-    ReactionProfile(IReaction reaction, String flagSequence) {
+    ReactionProfile(String flags) {
+        this.reaction = new Reaction();
+        this.flags = flags;
+    }
+
+    ReactionProfile(IReaction reaction, String flags) {
         this.reaction = reaction;
-        setFlags(flagSequence);
+        this.flags = flags;
+    }
+
+    @Override
+    public IReactionProfile clone() {
+        IReactionProfile reactionProfile = null;
+        try {
+            reactionProfile = (IReactionProfile) super.clone();
+            reactionProfile.setReaction((IReaction) this.reaction.clone());
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return reactionProfile;
     }
 
     @Override
@@ -39,20 +53,56 @@ class ReactionProfile implements IReactionProfile {
     }
 
     @Override
-    public void setFlags(String flagSequence) {
-        for (char f : flagSequence.toCharArray()) {
-            switch (f) {
-                case ('p') : {
-                    flags.put("print", true);
-                }
-            }
+    public void setFlags(char... cs) {
+        for (char c : cs) {
+            setFlag(c);
         }
     }
 
+    @Override
+    public void setFlag(char c) {
+        int i = flags.indexOf(c);
+        flags = (i == -1)
+                ? flags + c
+                : flags;
+    }
 
     @Override
-    public boolean isPrintFlag() {
-        return flags.getOrDefault("print", false);
+    public void removeFlag(char c) {
+        int i = flags.indexOf(c);
+        flags = (i == -1)
+                ? flags
+                : new StringBuilder(flags).deleteCharAt(i).toString();
+    }
+
+    @Override
+    public void setFlag(char c, boolean b) {
+        int i = flags.indexOf(c);
+        flags = (i == -1)
+                ? b
+                  ? flags + c
+                  : flags
+                : b
+                  ? flags
+                  : new StringBuilder(flags).deleteCharAt(i).toString();
+    }
+
+    @Override
+    public void toggleFlag(char c) {
+        int i = flags.indexOf(c);
+        flags = (i == -1)
+                ? flags + c
+                : new StringBuilder(flags).deleteCharAt(i).toString();
+    }
+
+    @Override
+    public boolean getFlag(char c) {
+        return flags.indexOf(c) != -1;
+    }
+
+    @Override
+    public String getFlags() {
+        return flags;
     }
 
     @Override
@@ -60,12 +110,4 @@ class ReactionProfile implements IReactionProfile {
         return solved;
     }
 
-    public void setPrintFlag(boolean b) {
-        if (flags.containsKey("print")) {
-            flags.replace("print", b);
-        } else {
-            flags.put("print", b);
-        }
-        //flags.put("print", b);
-    }
 }

@@ -3,12 +3,9 @@ package net.scottnotfound.clara.reaction;
 import org.openscience.cdk.AtomContainerSet;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.fingerprint.*;
-import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IAtomContainerSet;
 import org.openscience.cdk.interfaces.IReaction;
-import org.openscience.cdk.qsar.DescriptorValue;
-import org.openscience.cdk.qsar.descriptors.atomic.AtomHybridizationVSEPRDescriptor;
 
 import java.util.BitSet;
 import java.util.Spliterator;
@@ -36,95 +33,16 @@ class ReactionEngine {
         return unsolvedReaction;
     }
 
-    IReaction solveSimpleSN2Reaction(IReaction unsolvedReaction) {
-        if (!checkSimpleSN2(unsolvedReaction)) {
-            System.out.println("Reaction is not a valid single halogen alkane SN2 reaction with alkali halogen salt.");
-        }
-
-        return unsolvedReaction;
-    }
-
-    private boolean isValidReaction(IReaction reaction) {
-        return reaction.getReactantCount() != 1;
-    }
-
     /**
-     * Checks the reaction to see of the reaction is between a haloalkane and a halogen alkali salt.
-     * The halogen must not be on a tertiary carbon and there may be only one halogen in the reacting molecule.
-     * The reacting molecule must also be under 30 atoms in size.
+     * Generates a bitset of the given dimension to act as the input layer of a neural network.
+     * The fingerprints present are used as indices of the bitset vector and mapped to an address
+     * space of dim.
      *
-     * @param reaction reaction to check
-     * @return true if the reaction is valid, false otherwise
+     * @param reaction Reaction from which the bitset is generated.
+     * @param FPclass Class of the fingerprint.
+     * @param dim Dimension or size of the bitset.
+     * @return Bitset of the modulo folded fingerprints.
      */
-    private boolean checkSimpleSN2(IReaction reaction) {
-
-        if (!isValidReaction(reaction)) {
-            return false;
-        }
-
-        if (reaction.getReactantCount() != 2) {
-            return false;
-        }
-
-        Iterable<IAtomContainer> reactants = reaction.getReactants().atomContainers();
-        for (IAtomContainer reactant : reactants) {
-
-            if (reactant.getAtomCount() > 30) {
-                return false;
-            }
-            if (reactant.getAtomCount() == 2) {
-                boolean nuc = false;
-                for (IAtom iAtom : reactant.atoms()) {
-                    int an = iAtom.getAtomicNumber();
-                    nuc = nuc || an == 9 || an == 17 || an == 35 || an == 53;
-                }
-                if (nuc) {
-                    continue;
-                }
-            }
-
-            boolean flag1 = false;
-            Iterable<IAtom> atoms = reactant.atoms();
-            for (IAtom atom : atoms) {
-
-                int atomicNumber = atom.getAtomicNumber();
-                if (atomicNumber != 6 && atomicNumber != 1) { // carbon or hydrogen
-
-                    if (atomicNumber == 9 || atomicNumber == 17 || atomicNumber == 35 || atomicNumber == 53) {
-
-                        if (flag1) {
-                            return false;
-                        } else {
-                            flag1 = true;
-                        }
-
-                        for (IAtom atom1 : reactant.getConnectedAtomsList(atom)) {
-
-                            DescriptorValue descriptorValue = new AtomHybridizationVSEPRDescriptor().calculate(atom1, reactant);
-                            Integer hybridizationValue = Integer.parseInt(descriptorValue.getValue().toString());
-                            if (hybridizationValue != 3) {
-                                // needs sp3 hybridization
-                                return false;
-                            }
-                            if (atom1.getImplicitHydrogenCount() == 0) {
-                                // tertiary carbon
-                                return false;
-                            }
-
-                        }
-
-                    } else {
-                        return false;
-                    }
-
-                }
-
-            }
-        }
-
-        return true;
-    }
-
     private BitSet generateFoldedFP(IReaction reaction, int FPclass, int dim) {
 
         IBitFingerprint bitSetFingerprint   = new BitSetFingerprint(dim);
@@ -133,10 +51,12 @@ class ReactionEngine {
         IAtomContainerSet atomContainerSet = new AtomContainerSet();
         atomContainerSet.add(reaction.getReactants());
         atomContainerSet.add(reaction.getAgents());
+        atomContainerSet.add(reaction.getProducts());
 
         Spliterator<IAtomContainer> atomContainerSpliterator = atomContainerSet.atomContainers().spliterator();
         Stream<IAtomContainer> atomContainerStream = StreamSupport.stream(atomContainerSpliterator, true);
 
+        // OR together all the bitsets of all the fingerprints
         atomContainerStream.forEach(mol ->
                                     {
                                         try {
@@ -149,6 +69,7 @@ class ReactionEngine {
         return bitSetFingerprint.asBitSet();
     }
 
+    /** Folds the fingerprint counts into a bitset. */
     private BitSet foldCFP(ICountFingerprint countFingerprint, int dim) {
 
         final BitSet bitSet = new BitSet(dim);
