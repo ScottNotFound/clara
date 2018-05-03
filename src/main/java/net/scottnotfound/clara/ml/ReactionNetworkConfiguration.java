@@ -9,11 +9,11 @@ import org.nd4j.linalg.lossfunctions.LossFunctions.LossFunction;
  * This class is a proxy for the Configurations in DL4J to simplify
  * the network building for chemical reaction purposes.
  */
-class NetworkConfiguration {
+class ReactionNetworkConfiguration {
 
     private Builder builder;
 
-    private NetworkConfiguration(Builder builder) {
+    private ReactionNetworkConfiguration(Builder builder) {
         this.builder = builder;
     }
 
@@ -35,8 +35,8 @@ class NetworkConfiguration {
         private WeightInit      weightInit      = WeightInit.XAVIER;
 
 
-        NetworkConfiguration build() {
-            return new NetworkConfiguration(this);
+        ReactionNetworkConfiguration build() {
+            return new ReactionNetworkConfiguration(this);
         }
 
         /** Seed to initialize random weights. */
