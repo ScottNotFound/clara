@@ -9,7 +9,6 @@ Thumbs.db
 
 # gradle
 /.gradle
-/build
 
 # eclipse
 /.settings
@@ -22,14 +21,19 @@ Thumbs.db
 # intellij
 /.idea
 /out
-/*.ipr
-/*.iws
-/*.iml
+*.ipr
+*.iws
+*.iml
 
 # bin
 *.exe
 *.jar
 *.out
+*.dll
+*.so
+*.a
 !/gradle/wrapper/gradle-wrapper.jar
 
 /run
+/build
+/venv
