@@ -7,92 +7,86 @@ import org.datavec.api.split.partition.PartitionMetaData;
 import org.datavec.api.split.partition.Partitioner;
 import org.datavec.api.writable.Writable;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.List;
 
 public class ReactionRecordWriter implements RecordWriter {
 
+    public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+    public static final String NEW_LINE = "\n";
+
+    protected DataOutputStream out;
+    protected Charset encoding = DEFAULT_CHARSET;
+    protected Partitioner partitioner;
+    protected Configuration conf;
+
+    public ReactionRecordWriter() {}
 
 
-    /**
-     * Returns true if this record writer
-     * supports efficient batch writing using {@link #writeBatch(List)}
-     *
-     * @return
-     */
     @Override
     public boolean supportsBatch() {
         return false;
     }
 
-    /**
-     * Initialize a record writer with the given input split
-     *
-     * @param inputSplit  the input split to initialize with
-     * @param partitioner
-     */
     @Override
     public void initialize(InputSplit inputSplit, Partitioner partitioner) throws Exception {
-
+        partitioner.init(inputSplit);
+        out = new DataOutputStream(partitioner.currentOutputStream());
+        this.partitioner = partitioner;
     }
 
-    /**
-     * Initialize the record reader with the given configuration
-     * and {@link InputSplit}
-     *
-     * @param configuration the configuration to iniailize with
-     * @param split         the split to use
-     * @param partitioner
-     */
     @Override
     public void initialize(Configuration configuration, InputSplit split, Partitioner partitioner) throws Exception {
-
+        setConf(configuration);
+        partitioner.init(configuration, split);
+        initialize(split, partitioner);
     }
 
-    /**
-     * Write a record
-     *
-     * @param record the record to write
-     */
     @Override
     public PartitionMetaData write(List<Writable> record) throws IOException {
-        return null;
+        if (!record.isEmpty()) {
+            ReactionWritable r = (ReactionWritable) record.iterator().next();
+            r.write(out);
+            out.write(NEW_LINE.getBytes());
+        }
+        return PartitionMetaData.builder().numRecordsUpdated(1).build();
     }
 
-    /**
-     * Write a batch of records
-     *
-     * @param batch the batch to write
-     */
     @Override
     public PartitionMetaData writeBatch(List<List<Writable>> batch) throws IOException {
-        return null;
+        for (List<Writable> record : batch) {
+            ReactionWritable r = (ReactionWritable) record.iterator().next();
+            try {
+                r.write(out);
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+        return PartitionMetaData.builder().numRecordsUpdated(1).build();
     }
 
-    /**
-     * Close the recod reader
-     */
     @Override
     public void close() {
-
+        if (out != null) {
+            try {
+                out.flush();
+                out.close();
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
+        }
     }
 
-    /**
-     * Set the configuration to be used by this object.
-     *
-     * @param conf
-     */
     @Override
     public void setConf(Configuration conf) {
-
+        this.conf = conf;
     }
 
-    /**
-     * Return the configuration used by this object.
-     */
     @Override
     public Configuration getConf() {
-        return null;
+        return conf;
     }
 
 }
